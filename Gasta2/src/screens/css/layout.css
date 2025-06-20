@@ -33,8 +33,9 @@
 }
 
 .logo-text h2 {
-  font-size: 1rem;
+  font-size: 1.2rem;
   font-weight: 600;
+  margin-top: 18%;
   color: #1f2937;
   margin-bottom: 0.125rem;
 }
@@ -75,11 +76,13 @@
 
 .sidebar-nav {
   flex: 1;
-  padding: 1.5rem;
+  padding: 1.3rem;
 }
 
 .nav-list {
   list-style: none;
+  padding: 0;
+  margin: 0;
 }
 
 .nav-item {
