@@ -1,53 +1,27 @@
-package mx.edu.utez.gasta2.Model.Usuarios;
+package mx.edu.utez.gasta2.Model.Usuarios.DTO;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.OneToMany;
 import mx.edu.utez.gasta2.Model.Gastos.GastoBean;
+import mx.edu.utez.gasta2.Model.Usuarios.UsuarioBean;
+
 import java.util.Set;
 
-@Entity
-@Table(name = "Usuarios")
-public class UsuarioBean {
+public class UsuarioDTO {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    @Column(length = 50, unique = true)
     private String nombreusuario;
-
-    @Column(length = 50, unique = true)
     private String correo;
-
-    @Column(columnDefinition = "TEXT")
     private String contrasenia;
-
-    @Column()
     private Integer espaciosdisponibles;
-
-    @JsonIgnore
-    @OneToMany(mappedBy = "usuario", fetch = FetchType.LAZY)
     private Set<GastoBean> gastoBeans;
 
-
-
-    public UsuarioBean(Long id, String nombreusuario, String correo, String contrasenia, Integer espaciosdisponibles) {
-        this.id = id;
-        this.nombreusuario = nombreusuario ;
-        this.correo = correo;
-        this.contrasenia = contrasenia;
-        this.espaciosdisponibles = espaciosdisponibles;
+    public UsuarioBean toEntity(){
+        return new UsuarioBean(nombreusuario,correo,contrasenia,espaciosdisponibles);
     }
 
-    public UsuarioBean(String nombreusuario, String correo, String contrasenia, Integer espaciosdisponibles) {
-        this.nombreusuario = nombreusuario;
-        this.correo = correo;
-        this.contrasenia = contrasenia;
-        this.espaciosdisponibles = espaciosdisponibles;
-    }
-
-    public UsuarioBean() {
-    }
 
     public Long getId() {
         return id;
@@ -87,5 +61,13 @@ public class UsuarioBean {
 
     public void setEspaciosdisponibles(Integer espaciosdisponibles) {
         this.espaciosdisponibles = espaciosdisponibles;
+    }
+
+    public Set<GastoBean> getGastoBeans() {
+        return gastoBeans;
+    }
+
+    public void setGastoBeans(Set<GastoBean> gastoBeans) {
+        this.gastoBeans = gastoBeans;
     }
 }
