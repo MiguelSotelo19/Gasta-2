@@ -18,7 +18,7 @@ public class UsuariosEspaciosBean {
     private UsuarioBean usuario;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "fk_id_espacio", nullable = false)
+    @JoinColumn(name = "fk_id_espacio", nullable = true)
     private EspacioBean espacio;
 
     @ManyToOne(fetch = FetchType.LAZY)
