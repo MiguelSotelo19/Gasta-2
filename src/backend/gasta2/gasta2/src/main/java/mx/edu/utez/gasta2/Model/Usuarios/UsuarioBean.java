@@ -29,7 +29,33 @@ public class UsuarioBean {
     @OneToMany(mappedBy = "usuario", fetch = FetchType.LAZY)
     private Set<GastoBean> gastoBeans;
 
+    @Column(columnDefinition = "BOOLEAN")
+    private Boolean status;
 
+    public Boolean getStatus() {
+        return status;
+    }
+
+    public void setStatus(Boolean status) {
+        this.status = status;
+    }
+
+    public UsuarioBean(Long id, String nombreusuario, String correo, String contrasenia, Integer espaciosdisponibles, Boolean status) {
+        this.id = id;
+        this.nombreusuario = nombreusuario;
+        this.correo = correo;
+        this.contrasenia = contrasenia;
+        this.espaciosdisponibles = espaciosdisponibles;
+        this.status = status;
+    }
+
+    public UsuarioBean(String nombreusuario, String correo, String contrasenia, Integer espaciosdisponibles, Boolean status) {
+        this.nombreusuario = nombreusuario;
+        this.correo = correo;
+        this.contrasenia = contrasenia;
+        this.espaciosdisponibles = espaciosdisponibles;
+        this.status = status;
+    }
 
     public UsuarioBean(Long id, String nombreusuario, String correo, String contrasenia, Integer espaciosdisponibles) {
         this.id = id;

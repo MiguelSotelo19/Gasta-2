@@ -28,6 +28,8 @@ public class UsuariosEspaciosBean {
     @Column(name = "porcentaje_gasto")
     private Double porcentajeGasto;
 
+
+
     public Long getId() {
         return id;
     }
@@ -55,6 +57,8 @@ public class UsuariosEspaciosBean {
     public RolBean getRol() {
         return rol;
     }
+
+
 
     public void setRol(RolBean rol) {
         this.rol = rol;

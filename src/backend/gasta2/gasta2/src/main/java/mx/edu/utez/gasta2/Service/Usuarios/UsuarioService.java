@@ -6,6 +6,7 @@ import mx.edu.utez.gasta2.Model.Usuarios.UsuariosRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,6 +21,8 @@ public class UsuarioService {
     @Autowired
     private UsuariosRepository repository;
 
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
 
     //Service para el registro de usuarios
@@ -55,6 +58,9 @@ public class UsuarioService {
         if(encontradoCorreo.isPresent()){
             return new ResponseEntity<>(new ApiResponse(HttpStatus.FORBIDDEN, true, "Este correo ya se encuentra registrado"), HttpStatus.FORBIDDEN);
         }
+
+        String encrypted = passwordEncoder.encode(usuario.getContrasenia());
+        usuario.setContrasenia(encrypted);
 
         return new ResponseEntity<>(new ApiResponse(repository.saveAndFlush(usuario), HttpStatus.CREATED, "Se ha registrado al usuario correctamente"), HttpStatus.CREATED);
 
