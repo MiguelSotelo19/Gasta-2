@@ -18,7 +18,7 @@ public class UsuariosEspaciosBean {
     private UsuarioBean usuario;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "fk_id_espacio", nullable = false)
+    @JoinColumn(name = "fk_id_espacio", nullable = true)
     private EspacioBean espacio;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -27,6 +27,8 @@ public class UsuariosEspaciosBean {
 
     @Column(name = "porcentaje_gasto")
     private Double porcentajeGasto;
+
+
 
     public Long getId() {
         return id;
@@ -55,6 +57,8 @@ public class UsuariosEspaciosBean {
     public RolBean getRol() {
         return rol;
     }
+
+
 
     public void setRol(RolBean rol) {
         this.rol = rol;
