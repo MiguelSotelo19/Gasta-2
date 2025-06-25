@@ -28,7 +28,9 @@ public class MainSecurity {
     private final String[] WHITE_LIST = {
             "/api/auth/**",
             "/api/usuarios/registrar",
-
+            "/api/usuarios/verify",
+            "/api/usuarios/verify/code",
+            "/api/usuarios/verify/reset",
 
 
     };
