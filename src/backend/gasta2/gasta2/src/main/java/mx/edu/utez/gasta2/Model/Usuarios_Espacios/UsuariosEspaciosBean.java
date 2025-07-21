@@ -21,7 +21,7 @@ public class UsuariosEspaciosBean {
     @JoinColumn(name = "fk_id_espacio", nullable = true)
     private EspacioBean espacio;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "id_rol", nullable = false)
     private RolBean rol;
 
