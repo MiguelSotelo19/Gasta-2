@@ -12,28 +12,27 @@ import java.util.Set;
 public class EspacioDTO {
     @NotNull(groups = {Update.class})
     private Long id;
+
     @NotBlank(groups = {Register.class, Update.class})
     private String nombre;
 
-    public EspacioBean toEntity(){
+    @NotNull(groups = {Register.class})
+    private Long idUsuario; 
+
+    public EspacioBean toEntity() {
         return new EspacioBean(nombre);
     }
-    public interface Register{}
+
+    public interface Register {}
     public interface Update {}
 
-    public Long getId() {
-        return id;
-    }
+    // Getters y setters
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+    public String getNombre() { return nombre; }
+    public void setNombre(String nombre) { this.nombre = nombre; }
 
-    public String getNombre() {
-        return nombre;
-    }
-
-    public void setNombre(String nombre) {
-        this.nombre = nombre;
-    }
+    public Long getIdUsuario() { return idUsuario; }
+    public void setIdUsuario(Long idUsuario) { this.idUsuario = idUsuario; }
 }

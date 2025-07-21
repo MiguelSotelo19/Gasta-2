@@ -40,7 +40,8 @@ public class EspaciosController {
     }
 
     @PostMapping("/crear")
-    public ResponseEntity<ApiResponse>create(@Validated(EspacioDTO.Register.class) @RequestBody EspacioDTO dto){
-        return service.createSpace(dto.toEntity());
+    public ResponseEntity<ApiResponse> create(@Validated(EspacioDTO.Register.class) @RequestBody EspacioDTO dto) {
+        return service.createSpace(dto.toEntity(), dto.getIdUsuario());
     }
+
 }
