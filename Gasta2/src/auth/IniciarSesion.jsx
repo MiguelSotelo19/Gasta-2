@@ -136,7 +136,7 @@ const IniciarSesion = ({ onAutenticacionExitosa }) => {
                 <div className="text-center">
                     <button
                         className="btn btn-secundario"
-                        onClick={() => navegar('/RecuperarContraseña')}
+                        onClick={() => navegar('/RecuperarContrasena')}
                     >
                         ¿Olvidaste tu contraseña?
                     </button>
