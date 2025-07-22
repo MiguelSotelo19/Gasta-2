@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import { FaEye, FaEyeSlash, FaDollarSign } from 'react-icons/fa';
-import RequisitoContraseña from './RequisitoContraseña';
+import RequisitoContrasena from './RequisitoContrasena';
 import '../../../Gasta2/src/screens/css/auth.css';
 
 const Registrarse = ({ onAutenticacionExitosa }) => {
@@ -224,7 +224,7 @@ const Registrarse = ({ onAutenticacionExitosa }) => {
                                 {showPassword ? <FaEyeSlash /> : <FaEye />}
                             </span>
                         </div>
-                        <RequisitoContraseña contrasena={contrasena} />
+                        <RequisitoContrasena contrasena={contrasena} />
                     </div>
                     
                     <div className="form-group password-group">
