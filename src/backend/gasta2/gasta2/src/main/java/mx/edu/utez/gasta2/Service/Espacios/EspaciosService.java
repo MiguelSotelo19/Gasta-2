@@ -91,6 +91,32 @@ public class EspaciosService {
         return codigo;
     }
 
+    //unirse a un espacio
+
+//    @Transactional(rollbackFor = {SQLException.class})
+//    public ResponseEntity<ApiResponse> JoinSpace(String codigo, Long idUsuario){
+//        Optional<EspacioBean> foundCode = repository.findByCodigoinvitacion(codigo);
+//
+//        if(foundCode.isPresent()){
+//
+//            EspacioBean espacioBean = foundCode.get();
+//            Optional<UsuarioBean> foundUser = usuariosRepository.findById(idUsuario);
+//
+//            if(foundUser.isPresent()){
+//                Optional<RolBean> rolBean = rolRepository.findById(2L);
+//                UsuarioBean user = foundUser.get();
+//                UsuariosEspaciosBean usuariosEspaciosBean = new UsuariosEspaciosBean();
+//                usuariosEspaciosBean.setEspacio(espacioBean);
+//                usuariosEspaciosBean.setUsuario(user);
+//                usuariosEspaciosBean.setRol(rolBean.get());
+//                //usuariosEspaciosBean.setPorcentajeGasto(); NECESITO QUE EL PORCENTAJE SE DIVIDA EQUITATIVAMENTE ENTRE EL NUMERO DE PERSONAS QUE SE ENCUNENTREN EN EL MISMO ESPACIO
+//                usuariosEspaciosService.AsignarEspaciosUsuarios(usuariosEspaciosBean);
+//            }
+//        }
+//
+//        return new ResponseEntity<>(new ApiResponse(HttpStatus.NOT_FOUND, true, "El espacio no fue encontrado"), HttpStatus.NOT_FOUND);
+//    }
+
 
 
 }

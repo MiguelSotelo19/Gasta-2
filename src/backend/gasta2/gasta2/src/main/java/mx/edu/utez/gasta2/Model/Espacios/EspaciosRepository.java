@@ -10,5 +10,7 @@ public interface EspaciosRepository extends JpaRepository<EspacioBean, Long> {
    Optional<EspacioBean>findByNombre(String nombre);
    boolean existsByCodigoinvitacion(String codigo);
 
+   Optional<EspacioBean> findByCodigoinvitacion(String codigo);
+
 
 }

@@ -17,7 +17,7 @@ public class EspacioDTO {
     private String nombre;
 
     @NotNull(groups = {Register.class})
-    private Long idUsuario; 
+    private Long idUsuario;
 
     public EspacioBean toEntity() {
         return new EspacioBean(nombre);

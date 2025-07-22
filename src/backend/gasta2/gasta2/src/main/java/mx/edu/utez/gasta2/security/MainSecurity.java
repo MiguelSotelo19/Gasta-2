@@ -72,6 +72,7 @@ public class MainSecurity {
                         req.requestMatchers(WHITE_LIST).permitAll()
                                 .requestMatchers("/api/espacios/").hasAnyRole("Administrador")
                                 .requestMatchers("/api/espacios/crear").hasAnyRole("Administrador")
+                                .requestMatchers("/api/usuarios-espacios/unirse").hasAnyRole("Administrador", "Invitado")
 
 
                                 .anyRequest().authenticated()
