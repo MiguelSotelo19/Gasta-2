@@ -1,11 +1,11 @@
 import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
 import IniciarSesion from '../../src/auth/IniciarSesion';
 import Registrarse from '../../src/auth/Registrarse';
-import RecuperarContraseña from '../auth/RecuperarContrasena';
-import RestablecerContraseña from '../auth/RestablecerContrasena';
-import RequisitoContraseña from '../auth/RequisitoContrasena';
+import RecuperarContrasena from '../auth/RecuperarContrasena';
+import RestablecerContrasena from '../auth/RestablecerContrasena';
+import RequisitoContrasena from '../auth/RequisitoContrasena';
 import Hub from '../../src/screens/Hub';
-import Layout from '../../src/components/Layout';
+
 
 const AppRouter = () => {
     return (
