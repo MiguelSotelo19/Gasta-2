@@ -1,13 +1,13 @@
 import "./css/general.css"
 
-export const Categorias = ({ espacioActual }) =>{
+export const Categorias = ({ espacioActual, nombreEspacio }) =>{
     return(
         <>
         <div>
             <div className="dashboard-header">
               <div className="dashboard-title">
                 <h1>Categorías</h1>
-                <p>Gestiona las categorías de gastos del espacio: { espacioActual }</p>
+                <p>Gestiona las categorías de gastos del espacio: { nombreEspacio }</p>
               </div>
               <button className="primary-button">
                 <span>+</span>

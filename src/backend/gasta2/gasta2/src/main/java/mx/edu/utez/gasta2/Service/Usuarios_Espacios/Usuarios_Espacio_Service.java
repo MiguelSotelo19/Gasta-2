@@ -47,6 +47,16 @@ public class Usuarios_Espacio_Service {
         return ResponseEntity.ok(new ApiResponse(dtos, HttpStatus.OK, "Usuarios encontrados"));
     }
 
+    public ResponseEntity<ApiResponse> getAll() {
+        List<UsuariosEspaciosDTO> dtos = repository.findAll()
+                .stream()
+                .map(UsuariosEspaciosDTO::new)
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(new ApiResponse(dtos, HttpStatus.OK, "Todos los usuarios-espacios encontrados"));
+    }
+
+
 
     @Transactional(rollbackFor = {SQLException.class})
     public ResponseEntity<ApiResponse> AsignarEspaciosUsuarios(UsuariosEspaciosBean bean) {

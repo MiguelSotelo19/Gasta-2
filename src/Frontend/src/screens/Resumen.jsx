@@ -2,7 +2,7 @@ import { useState } from "react"
 import "./css/espacio.css"
 import "./css/general.css"
 
-export default function Resumen({ espacioActual }) {
+export default function Resumen({ espacioActual, nombreEspacio }) {
   const gastosRecientes = [
     { id: 1, description: "Supermercado Soriana", amount: 1250, category: "Comida", user: "María", date: "2024-01-15" },
     { id: 2, description: "Recibo de luz", amount: 850, category: "Energéticas", user: "Juan", date: "2024-01-14" },
@@ -30,7 +30,7 @@ export default function Resumen({ espacioActual }) {
         <div className="dashboard-header">
           <div className="dashboard-title">
             <h1>Panel principal</h1>
-            <p>Resumen de gastos del espacio: {espacioActual}</p>
+            <p>Resumen de gastos del espacio: {nombreEspacio}</p>
           </div>
           <button className="primary-button">
             <span>+</span>

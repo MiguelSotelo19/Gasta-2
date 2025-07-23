@@ -9,6 +9,7 @@ import Resumen from "./Resumen"
 import "./css/layout.css"
 import "./css/general.css"
 import axiosInstance from "../services/axiosInstance"
+import { Button } from "../components/ui/button"
 
 export const Hub = () => {
     const API_URL = import.meta.env.VITE_API_URL;
@@ -17,7 +18,7 @@ export const Hub = () => {
     const urlEspaciosUser = `${API_URL}/api/usuarios-espacios/all?idUsuario=`
     const urlCrearEspacio = `${API_URL}/api/espacios/crear`
     const [seccionActiva, setSeccionActiva] = useState("resumen")
-    const [espacioActual, setEspacioActual] = useState("Casa Principal")
+    const [espacioActual, setEspacioActual] = useState(null)
 
     useEffect(() => {
         getUser();
@@ -32,30 +33,25 @@ export const Hub = () => {
         { id: "categorias", label: "Categorías", icon: "📋" }
     ]
 
-    const spaces = [
-        { name: "Casa Principal", code: "CP2024", miembros: 4, isAdmin: true },
-        { name: "Departamento", code: "DEPT01", miembros: 2, isAdmin: false },
-        { name: "Casa de Playa", code: "PLAYA3", miembros: 6, isAdmin: true },
-        { name: "Departamento 2", code: "DEPT01", miembros: 2, isAdmin: false },
-        { name: "Casa de Playa 2", code: "PLAYA3", miembros: 6, isAdmin: true },
-    ]
-
     const renderContent = () => {
+        if (!espacioActual) return <div className="p-4">Cargando...</div>; // Evita fallos si aún no está definido
+
         switch (seccionActiva) {
             case "resumen":
-                return <Resumen espacioActual={espacioActual} />
+                return <Resumen espacioActual={espacioActual} nombreEspacio={espacioActual.nombreEspacio} />
             case "gastos":
-                return <Gastos espacioActual={espacioActual} />
+                return <Gastos espacioActual={espacioActual} nombreEspacio={espacioActual.nombreEspacio}/>
             case "reportes":
-                return <Reportes espacioActual={espacioActual} />
+                return <Reportes espacioActual={espacioActual} nombreEspacio={espacioActual.nombreEspacio}/>
             case "miembros":
-                return <Miembros espacioActual={espacioActual} />
+                return <Miembros espacioActual={espacioActual} nombreEspacio={espacioActual.nombreEspacio}/>
             case "categorias":
-                return <Categorias espacioActual={espacioActual} />
+                return <Categorias espacioActual={espacioActual} nombreEspacio={espacioActual.nombreEspacio}/>
             default:
-                return <Resumen espacioActual={espacioActual} />
+                return <Resumen espacioActual={espacioActual} nombreEspacio={espacioActual.nombreEspacio}/>
         }
     }
+
 
     const [nuevoEspacio, setNuevoEspacio] = useState("")
     const [modalNuevoEspacioAbierto, setModalNuevoEspacioAbierto] = useState(false)
@@ -86,13 +82,18 @@ export const Hub = () => {
         try {
             const url = urlEspaciosUser + userId
             const respuesta = await axiosInstance(url)
-            console.log("espacios: ", respuesta.data.data)
-            setEspacios(respuesta.data.data)
+            const espaciosData = respuesta.data.data;
+            setEspacios(espaciosData);
+            console.log(respuesta.data.data)
+            if (!espacioActual && espaciosData.length > 0) {
+                setEspacioActual(espaciosData[0]);
+            }
+            console.log(espacioActual)
         } catch (e) {
             console.log(e)
         }
-
     }
+
 
     const agregarEspacio = async () => {
         const nombreNormalizado = nuevoEspacio.trim().toLowerCase();
@@ -101,9 +102,9 @@ export const Hub = () => {
             return;
         }
 
-        const espaciosUnicos = new Set(spaces.map(space => space.name.toLowerCase()));
+        const espaciosUnicos = new Set(espacios.map(espacios => espacios.nombreEspacio.toLowerCase()));
         if (espaciosUnicos.has(nombreNormalizado)) {
-            toast.error("Ese nombre ya está en uso.");
+            toast.error("Ya tienes un espacio con ese nombre");
             return;
         }
 
@@ -119,18 +120,29 @@ export const Hub = () => {
             }
             console.log(parametros)
             const response = await axiosInstance.post(urlCrearEspacio, parametros);
-            
+
             console.log(response)
             if (response) {
                 toast.success("Espacio agregado correctamente.");
                 setNuevoEspacio("");
                 setModalNuevoEspacioAbierto(false);
+                getEspacios();
+                getUser();
+                setSeccionActiva("miembros")
             }
 
         } catch (e) {
-            console.log("tronó")
-            console.log(e)
+        if (e.response?.status === 403) {
+            toast.error("Solo se permiten crear 5 espacios únicos.");
+            setNuevoEspacio("");
+            setModalNuevoEspacioAbierto(false);
+        } else {
+            toast.error("Hubo un error al crear el espacio.");
+            setNuevoEspacio("");
+            setModalNuevoEspacioAbierto(false);
+            console.error("Error desconocido:", e);
         }
+    }
 
     };
 
@@ -158,11 +170,15 @@ export const Hub = () => {
                         >
                             Agregar
                         </button>
+
                     </div>
                     <select
-                        className="space-select d-felx pe-3"
-                        value={espacioActual}
-                        onChange={(e) => setEspacioActual(e.target.value)}
+                        className="space-select d-flex pe-3"
+                        value={espacioActual?.nombreEspacio || ""}
+                        onChange={(e) => {
+                            const seleccionado = espacios.find(esp => esp.nombreEspacio === e.target.value);
+                            if (seleccionado) setEspacioActual(seleccionado);
+                        }}
                     >
                         {espacios.length === 0 ? (
                             <option disabled>No tienes espacios. ¡Únete o crea alguno!</option>
