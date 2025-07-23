@@ -6,6 +6,8 @@ import { FaEye, FaEyeSlash, FaDollarSign } from 'react-icons/fa';
 import axios from 'axios';
 
 const IniciarSesion = ({ onAutenticacionExitosa }) => {
+    const API_URL = import.meta.env.VITE_API_URL;
+    const urlSignIn = `${API_URL}/api/auth/signin`
     const [identificador, setIdentificador] = useState('');
     const [contrasena, setContrasena] = useState('');
     const [showPassword, setShowPassword] = useState(false);
@@ -29,7 +31,7 @@ const IniciarSesion = ({ onAutenticacionExitosa }) => {
         }
 
         try {
-            const response = await axios.post('http://127.0.0.1:8080/api/auth/signin', {
+            const response = await axios.post(urlSignIn, {
                 correo: identificador,
                 password: contrasena
             });

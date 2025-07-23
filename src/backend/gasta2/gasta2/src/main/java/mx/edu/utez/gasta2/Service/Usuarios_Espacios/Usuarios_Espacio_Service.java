@@ -7,6 +7,7 @@ import mx.edu.utez.gasta2.Model.Roles.RolBean;
 import mx.edu.utez.gasta2.Model.Roles.RolRepository;
 import mx.edu.utez.gasta2.Model.Usuarios.UsuarioBean;
 import mx.edu.utez.gasta2.Model.Usuarios.UsuariosRepository;
+import mx.edu.utez.gasta2.Model.Usuarios_Espacios.DTO.UsuariosEspaciosDTO;
 import mx.edu.utez.gasta2.Model.Usuarios_Espacios.UserEspaciosRepository;
 import mx.edu.utez.gasta2.Model.Usuarios_Espacios.UsuariosEspaciosBean;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -35,6 +37,16 @@ public class Usuarios_Espacio_Service {
 
     @Autowired
     private RolRepository rolRepository;
+
+    public ResponseEntity<ApiResponse> getAllByUsuario(Long idUsuario) {
+        List<UsuariosEspaciosDTO> dtos = repository.findAllByUsuario_Id(idUsuario)
+                .stream()
+                .map(UsuariosEspaciosDTO::new)
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(new ApiResponse(dtos, HttpStatus.OK, "Usuarios encontrados"));
+    }
+
 
     @Transactional(rollbackFor = {SQLException.class})
     public ResponseEntity<ApiResponse> AsignarEspaciosUsuarios(UsuariosEspaciosBean bean) {
