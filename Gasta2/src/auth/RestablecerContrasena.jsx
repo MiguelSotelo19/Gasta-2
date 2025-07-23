@@ -92,7 +92,7 @@ const RestablecerContrasena = () => {
                     <div className="logo">
                         <i className="fas fa-dollar-sign"></i>
                     </div>
-                    <div className="texto-marca">FinanceFamily</div>
+                    <div className="texto-marca">Gasta2</div>
                     <div className="subtitulo">Gestión Familiar</div>
                 </div>
 

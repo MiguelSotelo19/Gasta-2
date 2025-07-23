@@ -17,13 +17,7 @@ const AppRouter = () => {
                 <Route path="/RecuperarContrasena" element={<RecuperarContrasena />} />
                 <Route path="/RestablecerContrasena" element={<RestablecerContrasena />} />
                 <Route path="/RequisitoContrasena" element={<RequisitoContrasena />} />
-                
-                {/* Ruta protegida del dashboard */}
-                <Route path="/Hub" element={
-                    
-                        <Hub />
-        
-                } />
+                <Route path="/Hub" element={<Hub />} />
                 
                 {/* Redirección para rutas no encontradas */}
                 <Route path="*" element={<Navigate to="/IniciarSesion" replace />} />

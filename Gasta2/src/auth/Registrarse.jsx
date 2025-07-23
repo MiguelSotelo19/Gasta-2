@@ -153,7 +153,7 @@ const Registrarse = ({ onAutenticacionExitosa }) => {
             <div className="auth-form">
                 <div className="contenedor-logo">
                     <FaDollarSign className="logo-icon" />
-                    <div className="texto-marca">FinanceFamily</div>
+                    <div className="texto-marca">Gasta2</div>
                     <div className="subtitulo">Gestión Familiar</div>
                 </div>
 
