@@ -37,4 +37,10 @@ public class UsuariosController {
     public ResponseEntity<ApiResponse> resetPassword(@RequestBody PasswordResetDTO dto) {
         return service.newPassword(dto.getCorreo(), dto.getCodigo(), dto.getPassword());
     }
+
+    @DeleteMapping("/eliminar-cuenta/{id}")
+    public ResponseEntity<ApiResponse> eliminarCuenta(@PathVariable Long id) {
+        return service.eliminarCuenta(id);
+    }
+
 }
