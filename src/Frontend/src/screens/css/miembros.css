@@ -12,6 +12,7 @@
 
 .outline-button {
   background: white;
+  min-width: 20ch;
   border: 0.0625rem solid #d1d5db;
   color: #374151;
   padding: 0.5rem 1rem;
@@ -20,6 +21,8 @@
   cursor: pointer;
   display: flex;
   align-items: center;
+  justify-content: center;
+  text-align: center;
   gap: 0.5rem;
   transition: all 0.2s;
 }

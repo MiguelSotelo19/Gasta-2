@@ -27,6 +27,10 @@ public class Usuarios_Espacios_Controller {
         return service.getAllByUsuario(idUsuario);
     }
 
+    @GetMapping("/all-global")
+    public ResponseEntity<ApiResponse> getAll() {
+        return service.getAll();
+    }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ApiResponse> handleValidationErrors(MethodArgumentNotValidException ex) {
