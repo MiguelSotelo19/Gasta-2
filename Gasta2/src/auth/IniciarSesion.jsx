@@ -3,14 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import '../../../Gasta2/src/screens/css/auth.css';
 import { FaEye, FaEyeSlash, FaDollarSign } from 'react-icons/fa';
-
-// Obtener usuarios de localStorage o usar los predeterminados
-const getUsers = () => {
-    const storedUsers = localStorage.getItem('users');
-    return storedUsers ? JSON.parse(storedUsers) : [
-        { nip: 'mgonzalez', nombre: 'María González', correo: 'maria@ejemplo.com', contrasena: 'password123' }
-    ];
-};
+import axios from 'axios';
 
 const IniciarSesion = ({ onAutenticacionExitosa }) => {
     const [identificador, setIdentificador] = useState('');
@@ -36,34 +29,42 @@ const IniciarSesion = ({ onAutenticacionExitosa }) => {
         }
 
         try {
-            const users = getUsers();
-            const usuario = users.find(u =>
-                (u.nip === identificador || u.correo === identificador) &&
-                u.contrasena === contrasena
-            );
+            const response = await axios.post('http://127.0.0.1:8080/api/auth/signin', {
+                correo: identificador,
+                password: contrasena
+            });
 
-            if (!usuario) {
-                throw new Error('Credenciales inválidas');
+            const resp = response.data;
+
+            if (resp.error) {
+                throw new Error(resp.mensaje || 'Error en autenticación');
             }
+
+            const token = resp.data.token;
+            const id = resp.data.id;
+
+            localStorage.setItem('token', token);
+            localStorage.setItem('userId', id);
 
             await Swal.fire({
                 icon: 'success',
-                title: '¡Bienvenido!',
-                text: `Hola ${usuario.nombre}`,
+                title: '¡Inicio de sesión exitoso!',
+                text: 'Bienvenido a Gasta2',
                 timer: 1500,
                 showConfirmButton: false
             });
 
             if (onAutenticacionExitosa) {
-                onAutenticacionExitosa(usuario);
+                onAutenticacionExitosa({ id, token });
             }
-            navegar('/Hub'); // Redirigir al dashboard
+
+            navegar('/Hub');
 
         } catch (error) {
             Swal.fire({
                 icon: 'error',
                 title: 'Error de autenticación',
-                text: error.message,
+                text: error.response?.data?.mensaje || error.message,
                 timer: 3000,
                 showConfirmButton: false
             });
@@ -77,14 +78,14 @@ const IniciarSesion = ({ onAutenticacionExitosa }) => {
             <div className="auth-form">
                 <div className="contenedor-logo">
                     <FaDollarSign className="logo-icon" />
-                    <div className="texto-marca">FinanceFamily</div>
+                    <div className="texto-marca">Gasta2</div>
                     <div className="subtitulo">Gestión Familiar</div>
                 </div>
 
                 <form onSubmit={manejarEnvio}>
                     <div className="form-group">
                         <label htmlFor="identificadorLogin" className="etiqueta-formulario">
-                            NIP o Correo Electrónico
+                            Correo Electrónico
                         </label>
                         <input
                             type="text"

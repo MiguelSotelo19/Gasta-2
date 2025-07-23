@@ -15,6 +15,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 
@@ -36,8 +38,10 @@ public class AuthService {
     public ResponseEntity<ApiResponse> signIn(String correo, String password) {
         try {
             Optional<UsuarioBean> foundUser = personaRepository.findByCorreo(correo);
-            if (foundUser.isEmpty())
-                return new ResponseEntity<>(new ApiResponse(HttpStatus.BAD_REQUEST, true,"UserNotFound"), HttpStatus.BAD_REQUEST);
+            if (foundUser.isEmpty()) {
+                return new ResponseEntity<>(new ApiResponse(HttpStatus.BAD_REQUEST, true, "UserNotFound"), HttpStatus.BAD_REQUEST);
+            }
+
             UsuarioBean user = foundUser.get();
 
             Authentication auth = manager.authenticate(
@@ -45,9 +49,13 @@ public class AuthService {
             );
             SecurityContextHolder.getContext().setAuthentication(auth);
             String token = provider.generateToken(auth);
-            // Payload - DTO (token, attrs)
 
-            return new ResponseEntity<>(new ApiResponse(token, HttpStatus.OK,"Token generado"), HttpStatus.OK);
+            Map<String, Object> responseData = new HashMap<>();
+            responseData.put("token", token);
+            responseData.put("id", user.getId());
+
+            return new ResponseEntity<>(new ApiResponse(responseData, HttpStatus.OK, "Token generado"), HttpStatus.OK);
+
         } catch (Exception e) {
             e.printStackTrace();
             String message = "CredentialsMismatch";
@@ -55,7 +63,8 @@ public class AuthService {
                 message = "UserDisabled";
             if (e instanceof AccountExpiredException)
                 message = "Expiro";
-            return new ResponseEntity<>(new ApiResponse(HttpStatus.BAD_REQUEST,true, message), HttpStatus.UNAUTHORIZED);
+            return new ResponseEntity<>(new ApiResponse(HttpStatus.BAD_REQUEST, true, message), HttpStatus.UNAUTHORIZED);
         }
     }
+
 }
