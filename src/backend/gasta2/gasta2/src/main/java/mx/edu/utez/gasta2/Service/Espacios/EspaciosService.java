@@ -42,15 +42,13 @@ public class EspaciosService {
     }
 
     @Transactional(rollbackFor = {SQLException.class})
-    public ResponseEntity<ApiResponse> createSpace(EspacioBean espacioBean, Long idUsuario){
+    public ResponseEntity<ApiResponse> createSpace(EspacioBean espacioBean, Long idUsuario) {
         Optional<EspacioBean> found = repository.findByNombre(espacioBean.getNombre());
-
-        if(found.isPresent()){
+        if (found.isPresent()) {
             return new ResponseEntity<>(new ApiResponse(HttpStatus.BAD_REQUEST, true, "El nombre de este espacio ya se encuentra registrado"), HttpStatus.BAD_REQUEST);
         }
 
-
-        if(espacioBean.getNombre() == null || espacioBean.getNombre().isBlank()){
+        if (espacioBean.getNombre() == null || espacioBean.getNombre().isBlank()) {
             return new ResponseEntity<>(new ApiResponse(HttpStatus.BAD_REQUEST, true, "El nombre del espacio no debe estar vacío"), HttpStatus.BAD_REQUEST);
         }
 
@@ -60,25 +58,36 @@ public class EspaciosService {
         EspacioBean espacioGuardado = repository.saveAndFlush(espacioBean);
 
         Optional<UsuarioBean> optionalUsuarioBean = usuariosRepository.findById(idUsuario);
-        if(optionalUsuarioBean.isEmpty()){
+        if (optionalUsuarioBean.isEmpty()) {
             return new ResponseEntity<>(new ApiResponse(HttpStatus.BAD_REQUEST, true, "El usuario no se encuentra registrado"), HttpStatus.BAD_REQUEST);
         }
 
-        Optional<RolBean> optionalRolBean = rolRepository.findById(1L);
-        if(optionalRolBean.isEmpty()){
-            return new ResponseEntity<>(new ApiResponse(HttpStatus.BAD_REQUEST, true, "El rol no se encontro"), HttpStatus.BAD_REQUEST);
+        UsuarioBean user = optionalUsuarioBean.get();
+
+        if (user.getEspaciosdisponibles() == null || user.getEspaciosdisponibles() < 1) {
+            return new ResponseEntity<>(new ApiResponse(HttpStatus.FORBIDDEN, true, "El usuario ya no cuenta con espacios disponibles"), HttpStatus.FORBIDDEN);
+        }
+
+        // Restar un espacio disponible
+        user.setEspaciosdisponibles(user.getEspaciosdisponibles() - 1);
+        usuariosRepository.save(user);
+
+        Optional<RolBean> optionalRolBean = rolRepository.findById(1L); // Rol de admin
+        if (optionalRolBean.isEmpty()) {
+            return new ResponseEntity<>(new ApiResponse(HttpStatus.BAD_REQUEST, true, "El rol no se encontró"), HttpStatus.BAD_REQUEST);
         }
 
         UsuariosEspaciosBean usuariosEspaciosBean = new UsuariosEspaciosBean();
         usuariosEspaciosBean.setEspacio(espacioGuardado);
-        usuariosEspaciosBean.setUsuario(optionalUsuarioBean.get());
+        usuariosEspaciosBean.setUsuario(user);
         usuariosEspaciosBean.setRol(optionalRolBean.get());
         usuariosEspaciosBean.setPorcentajeGasto(100.0);
 
         usuariosEspaciosService.AsignarEspaciosUsuarios(usuariosEspaciosBean);
 
-        return new ResponseEntity<>(new ApiResponse(HttpStatus.CREATED, false ,"Espacio creado y asignado correctamente"), HttpStatus.OK);
+        return new ResponseEntity<>(new ApiResponse(HttpStatus.CREATED, false, "Espacio creado y asignado correctamente"), HttpStatus.CREATED);
     }
+
 
 
     public String generarCodigoInvitacionUnico() {

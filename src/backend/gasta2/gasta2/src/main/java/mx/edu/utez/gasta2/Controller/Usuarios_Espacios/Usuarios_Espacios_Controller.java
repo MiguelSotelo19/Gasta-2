@@ -1,6 +1,7 @@
 package mx.edu.utez.gasta2.Controller.Usuarios_Espacios;
 
 import mx.edu.utez.gasta2.Config.ApiResponse;
+import mx.edu.utez.gasta2.Model.Usuarios_Espacios.DTO.ChangeRolDTO;
 import mx.edu.utez.gasta2.Model.Usuarios_Espacios.DTO.UnirseEspacioDTO;
 import mx.edu.utez.gasta2.Service.Usuarios_Espacios.Usuarios_Espacio_Service;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,5 +37,10 @@ public class Usuarios_Espacios_Controller {
     @PostMapping("/unirse")
     public ResponseEntity<ApiResponse> unirseAEspacio(@Validated(UnirseEspacioDTO.Join.class) @RequestBody UnirseEspacioDTO dto) {
         return service.unirseAEspacio(dto.getCodigoEspacio(), dto.getIdUsuario());
+    }
+
+    @PatchMapping("/change-role")
+    public ResponseEntity<ApiResponse> cambiarRol(@Validated(ChangeRolDTO.changeRole.class) @RequestBody ChangeRolDTO dto){
+        return service.changeRolToAdmin(dto.getIdSpace(), dto.getIdAdmin(), dto.getIdUser());
     }
 }

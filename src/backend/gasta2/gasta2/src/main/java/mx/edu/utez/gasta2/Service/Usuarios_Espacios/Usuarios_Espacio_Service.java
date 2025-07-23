@@ -108,6 +108,41 @@ public class Usuarios_Espacio_Service {
         return new ResponseEntity<>(new ApiResponse(HttpStatus.CREATED, false, "Te uniste correctamente al espacio"), HttpStatus.CREATED);
     }
 
+    //Cambiar el rol del usuario
+    @Transactional(rollbackFor = {SQLException.class})
+    public ResponseEntity<ApiResponse> changeRolToAdmin(Long idEspacio, Long idAdmin, Long idUser) {
+
+        // Validar que el admin no se cambie solito su rol
+        if (idAdmin.equals(idUser)) {
+            return new ResponseEntity<>(new ApiResponse(HttpStatus.FORBIDDEN, true, "No puedes cambiar tu propio rol"), HttpStatus.FORBIDDEN);
+        }
+
+        // Validar que el admin si sea admin xd
+        Optional<UsuariosEspaciosBean> adminEnEspacio = repository.findByUsuarioIdAndEspacioId(idAdmin, idEspacio);
+        if (adminEnEspacio.isEmpty() || adminEnEspacio.get().getRol().getId() != 1L) {
+            return new ResponseEntity<>(new ApiResponse(HttpStatus.FORBIDDEN, true, "No tienes permisos para cambiar roles en este espacio"), HttpStatus.FORBIDDEN);
+        }
+
+        // Buscar el usuario
+        Optional<UsuariosEspaciosBean> usuarioEnEspacio = repository.findByUsuarioIdAndEspacioId(idUser, idEspacio);
+        if (usuarioEnEspacio.isEmpty()) {
+            return new ResponseEntity<>(new ApiResponse(HttpStatus.NOT_FOUND, true, "El usuario no se encuentra en este espacio"), HttpStatus.NOT_FOUND);
+        }
+
+        // Obtener el rol de admin (OSEA EL 1)
+        Optional<RolBean> rolAdmin = rolRepository.findById(1L);
+        if (rolAdmin.isEmpty()) {
+            return new ResponseEntity<>(new ApiResponse(HttpStatus.INTERNAL_SERVER_ERROR, true, "Rol de administrador no encontrado"), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+        // Cambiar el rol del usuario a admin (DE 2 A 1)
+        UsuariosEspaciosBean usuarioEspacio = usuarioEnEspacio.get();
+        usuarioEspacio.setRol(rolAdmin.get());
+        repository.save(usuarioEspacio);
+
+        return new ResponseEntity<>(new ApiResponse(HttpStatus.OK, false, "Rol cambiado a administrador correctamente"), HttpStatus.OK);
+    }
+
 
 
 }
