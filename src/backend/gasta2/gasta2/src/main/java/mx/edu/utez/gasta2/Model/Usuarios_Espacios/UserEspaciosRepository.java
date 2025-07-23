@@ -24,4 +24,6 @@ public interface UserEspaciosRepository extends JpaRepository<UsuariosEspaciosBe
     void deleteAllByEspacio(EspacioBean espacio);
 
     List<UsuariosEspaciosBean> findAllByUsuarioAndRolRol(UsuarioBean usuario, String rol);
+
+    List<UsuariosEspaciosBean> findAllByUsuario_Id(Long idUsuario);
 }
