@@ -21,7 +21,7 @@ public class UsuariosEspaciosBean {
     @JoinColumn(name = "fk_id_espacio", nullable = true)
     private EspacioBean espacio;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "id_rol", nullable = false)
     private RolBean rol;
 
@@ -29,6 +29,15 @@ public class UsuariosEspaciosBean {
     private Double porcentajeGasto;
 
 
+    public UsuariosEspaciosBean() {
+    }
+
+    public UsuariosEspaciosBean(UsuarioBean usuario, EspacioBean espacio, RolBean rol, Double porcentajeGasto) {
+        this.usuario = usuario;
+        this.espacio = espacio;
+        this.rol = rol;
+        this.porcentajeGasto = porcentajeGasto;
+    }
 
     public Long getId() {
         return id;

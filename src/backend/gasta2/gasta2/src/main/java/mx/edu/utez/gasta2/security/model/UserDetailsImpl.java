@@ -30,7 +30,8 @@ public class UserDetailsImpl implements UserDetails{
     }
 
     public static UserDetailsImpl build(UsuariosEspaciosBean user){
-        Set<GrantedAuthority> authorities = Collections.singleton(new SimpleGrantedAuthority(user.getRol().getRol()));
+        Set<GrantedAuthority> authorities =
+                Collections.singleton(new SimpleGrantedAuthority("ROLE_" + user.getRol().getRol()));
         return new UserDetailsImpl(
                 user.getUsuario().getCorreo(),
                 user.getUsuario().getContrasenia(),

@@ -70,6 +70,9 @@ public class MainSecurity {
         http.cors(Customizer.withDefaults()).csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(req ->
                         req.requestMatchers(WHITE_LIST).permitAll()
+                                .requestMatchers("/api/espacios/").hasAnyRole("Administrador")
+                                .requestMatchers("/api/espacios/crear").hasAnyRole("Administrador")
+                                .requestMatchers("/api/usuarios-espacios/unirse").hasAnyRole("Administrador", "Invitado")
 
 
                                 .anyRequest().authenticated()

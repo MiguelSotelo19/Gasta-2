@@ -24,6 +24,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     private UserEspaciosRepository usuariosEspaciosRepository;
 
     @Override
+    @Transactional
     public UserDetails loadUserByUsername(String correo) throws UsernameNotFoundException {
         UsuarioBean usuario = usuariosRepository.findByCorreo(correo)
                 .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado"));
