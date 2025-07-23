@@ -49,6 +49,11 @@ public class UsuarioService {
     private RolRepository rolRepository;
 
 
+    public ResponseEntity<ApiResponse> getAllUsers() {
+        List<UsuarioBean> usuarios = repository.findAll();
+        return new ResponseEntity<>(new ApiResponse(usuarios, HttpStatus.OK, "Usuarios encontrados"), HttpStatus.OK);
+    }
+
     //Service para el registro de usuarios
     @Transactional(rollbackFor = {SQLException.class})
     public ResponseEntity<ApiResponse> saveUser(UsuarioBean usuario){

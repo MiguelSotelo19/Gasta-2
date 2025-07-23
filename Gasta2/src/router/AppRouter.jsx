@@ -20,7 +20,7 @@ const AppRouter = () => {
                 <Route path="/Hub" element={<Hub />} />
                 
                 {/* Redirección para rutas no encontradas */}
-                <Route path="*" element={<Navigate to="/IniciarSesion" replace />} />
+                <Route path="*" element={<Navigate to="/404" replace />} />
             </Routes>
         </Router>
     );

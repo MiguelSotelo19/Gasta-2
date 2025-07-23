@@ -18,6 +18,11 @@ public class UsuariosController {
     @Autowired
     private UsuarioService service;
 
+    @GetMapping("/all")
+    public ResponseEntity<ApiResponse> getAllUsuarios() {
+        return service.getAllUsers();
+    }
+
     @PostMapping("/registrar")
     public ResponseEntity<ApiResponse> registrarUsuario(@RequestBody UsuarioDTO dto){
         return service.saveUser(dto.toEntity());
