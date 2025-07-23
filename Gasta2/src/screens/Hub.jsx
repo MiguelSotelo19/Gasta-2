@@ -1,6 +1,5 @@
 import { ToastContainer, toast } from "react-toastify"
 import "react-toastify/dist/ReactToastify.css"
-
 import { useState } from "react"
 import { Gastos } from "./Gastos"
 import { Reportes } from "./Reportes"
@@ -10,7 +9,7 @@ import Resumen from "./Resumen"
 import "./css/layout.css"
 import "./css/general.css"
 
-export const Hub = () => {
+export const Hub = ({ usuario, onCerrarSesion }) => {
     const [seccionActiva, setSeccionActiva] = useState("resumen")
     const [espacioActual, setEspacioActual] = useState("Casa Principal")
 
@@ -47,6 +46,7 @@ export const Hub = () => {
 
     const [nuevoEspacio, setNuevoEspacio] = useState("")
     const [modalNuevoEspacioAbierto, setModalNuevoEspacioAbierto] = useState(false)
+    const [modalConfiguracionAbierto, setModalConfiguracionAbierto] = useState(false)
 
     const agregarEspacio = () => {
         if (!nuevoEspacio.trim()) {
@@ -66,6 +66,11 @@ export const Hub = () => {
         setModalNuevoEspacioAbierto(false)
     }
 
+    // Función para obtener iniciales del nombre
+    const obtenerIniciales = (nombre) => {
+        return nombre.split(' ').map(part => part[0]).join('').toUpperCase()
+    }
+
     return (
         <div className="app-container">
             <ToastContainer position="top-center" autoClose={3000} />
@@ -74,7 +79,7 @@ export const Hub = () => {
                 <div className="sidebar-header">
                     <div className="logo-container">
                         <div className="logo-icon">$</div>
-                        <div className="logo-text ">
+                        <div className="logo-text">
                             <h2>Gasta2</h2>
                             <p>Gestión Familiar</p>
                         </div>
@@ -84,12 +89,20 @@ export const Hub = () => {
                 <div className="space-selector">
                     <div className="d-flex align-items-center justify-content-between mb-2">
                         <label className="mb-0">Espacio Actual</label>
-                        <button type="button" className="btn btn-success btn-sm" style={{ padding: "0.25rem 0.75rem" }}
-                            onClick={() => setModalNuevoEspacioAbierto(true)} >
+                        <button 
+                            type="button" 
+                            className="btn btn-success btn-sm" 
+                            style={{ padding: "0.25rem 0.75rem" }}
+                            onClick={() => setModalNuevoEspacioAbierto(true)}
+                        >
                             Agregar
                         </button>
                     </div>
-                    <select className="space-select d-felx pe-3" value={espacioActual} onChange={(e) => setEspacioActual(e.target.value)}>
+                    <select 
+                        className="space-select d-felx pe-3" 
+                        value={espacioActual} 
+                        onChange={(e) => setEspacioActual(e.target.value)}
+                    >
                         {spaces.map((space, index) => (
                             <option key={index} value={space.name}>
                                 {space.name} {space.isAdmin ? "(Admin)" : ""}
@@ -98,13 +111,14 @@ export const Hub = () => {
                     </select>
                 </div>
 
-
                 <nav className="sidebar-nav">
                     <ul className="nav-list">
                         {sidebar.map((item) => (
                             <li key={item.id} className="nav-item">
-                                <button  className={`nav-button ${seccionActiva === item.id ? "active" : ""}`}
-                                    onClick={() => setSeccionActiva(item.id)}>
+                                <button 
+                                    className={`nav-button ${seccionActiva === item.id ? "active" : ""}`}
+                                    onClick={() => setSeccionActiva(item.id)}
+                                >
                                     <span className="nav-icon">{item.icon}</span>
                                     <span>{item.label}</span>
                                 </button>
@@ -114,12 +128,19 @@ export const Hub = () => {
                 </nav>
 
                 <div className="user-profile">
-                    <div className="user-avatar">MG</div>
+                    <div className="user-avatar">
+                        {usuario ? obtenerIniciales(usuario.nombre) : "MG"}
+                    </div>
                     <div className="user-info">
-                        <h4>María González</h4>
+                        <h4>{usuario ? usuario.nombre : "María González"}</h4>
                         <p>Administrador</p>
                     </div>
-                    <button className="icon-button">⚙️</button>
+                    <button 
+                        className="icon-button"
+                        onClick={() => setModalConfiguracionAbierto(true)}
+                    >
+                        ⚙️
+                    </button>
                 </div>
             </div>
 
@@ -127,17 +148,27 @@ export const Hub = () => {
                 <header className="top-bar">
                     <div className="search-container">
                         <span className="search-icon">🔍</span>
-                        <input type="text" placeholder="Buscar gastos, miembros..." className="search-input" />
+                        <input 
+                            type="text" 
+                            placeholder="Buscar gastos, miembros..." 
+                            className="search-input" 
+                        />
                     </div>
                     <div className="top-bar-actions">
                         <button className="icon-button">🔔</button>
-                        <button className="icon-button">👤</button>
+                        <button 
+                            className="icon-button"
+                            onClick={onCerrarSesion}
+                        >
+                            👤
+                        </button>
                     </div>
                 </header>
 
                 <main className="content-area">{renderContent()}</main>
             </div>
 
+            {/* Modal Nuevo Espacio (se mantiene igual) */}
             {modalNuevoEspacioAbierto && (
                 <>
                     <div className="modal fade show d-block" tabIndex="-1" role="dialog" style={{ backgroundColor: "rgba(0,0,0,0.5)" }}>
@@ -145,20 +176,44 @@ export const Hub = () => {
                             <div className="modal-content">
                                 <div className="modal-header d-flex justify-content-between">
                                     <h5 className="modal-title">Agregar nuevo espacio</h5>
-                                    <button type="button" className="close" aria-label="Close" onClick={() => setModalNuevoEspacioAbierto(false)}
-                                        style={{ backgroundColor: "transparent", border: "none", fontSize: "1.25rem", color: "black", cursor: "pointer" }}>
+                                    <button 
+                                        type="button" 
+                                        className="close" 
+                                        aria-label="Close" 
+                                        onClick={() => setModalNuevoEspacioAbierto(false)}
+                                        style={{ 
+                                            backgroundColor: "transparent", 
+                                            border: "none", 
+                                            fontSize: "1.25rem", 
+                                            color: "black", 
+                                            cursor: "pointer" 
+                                        }}
+                                    >
                                         <span aria-hidden="true">&times;</span>
                                     </button>
                                 </div>
                                 <div className="modal-body">
-                                    <input type="text" className="form-control" placeholder="Nombre del nuevo espacio"
-                                        value={nuevoEspacio} onChange={(e) => setNuevoEspacio(e.target.value)}/>
+                                    <input 
+                                        type="text" 
+                                        className="form-control" 
+                                        placeholder="Nombre del nuevo espacio"
+                                        value={nuevoEspacio} 
+                                        onChange={(e) => setNuevoEspacio(e.target.value)}
+                                    />
                                 </div>
                                 <div className="modal-footer">
-                                    <button type="button" className="btn btn-secondary" onClick={() => setModalNuevoEspacioAbierto(false)}>
+                                    <button 
+                                        type="button" 
+                                        className="btn btn-secondary" 
+                                        onClick={() => setModalNuevoEspacioAbierto(false)}
+                                    >
                                         Cancelar
                                     </button>
-                                    <button type="button" className="btn btn-success" onClick={agregarEspacio}>
+                                    <button 
+                                        type="button" 
+                                        className="btn btn-success" 
+                                        onClick={agregarEspacio}
+                                    >
                                         Agregar
                                     </button>
                                 </div>
@@ -169,6 +224,87 @@ export const Hub = () => {
                 </>
             )}
 
+            {/* Modal Configuración */}
+            {modalConfiguracionAbierto && (
+                <>
+                    <div className="modal fade show d-block" tabIndex="-1" role="dialog" style={{ backgroundColor: "rgba(0,0,0,0.5)" }}>
+                        <div className="modal-dialog modal-dialog-centered" role="document">
+                            <div className="modal-content">
+                                <div className="modal-header d-flex justify-content-between">
+                                    <h5 className="modal-title">Configuración de cuenta</h5>
+                                    <button 
+                                        type="button" 
+                                        className="close" 
+                                        aria-label="Close" 
+                                        onClick={() => setModalConfiguracionAbierto(false)}
+                                        style={{ 
+                                            backgroundColor: "transparent", 
+                                            border: "none", 
+                                            fontSize: "1.25rem", 
+                                            color: "black", 
+                                            cursor: "pointer" 
+                                        }}
+                                    >
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <div className="modal-body">
+                                    <div className="mb-3">
+                                        <label className="form-label">Nombre</label>
+                                        <input 
+                                            type="text" 
+                                            className="form-control" 
+                                            value={usuario?.nombre || ''} 
+                                            readOnly
+                                        />
+                                    </div>
+                                    <div className="mb-3">
+                                        <label className="form-label">Correo electrónico</label>
+                                        <input 
+                                            type="email" 
+                                            className="form-control" 
+                                            value={usuario?.correo || ''} 
+                                            readOnly
+                                        />
+                                    </div>
+                                    <div className="mb-3">
+                                        <label className="form-label">NIP</label>
+                                        <input 
+                                            type="text" 
+                                            className="form-control" 
+                                            value={usuario?.nip || ''} 
+                                            readOnly
+                                        />
+                                    </div>
+                                </div>
+                                <div className="modal-footer">
+                                    <button 
+                                        type="button" 
+                                        className="btn btn-secondary" 
+                                        onClick={() => setModalConfiguracionAbierto(false)}
+                                    >
+                                        Cerrar
+                                    </button>
+                                    <button 
+                                        type="button" 
+                                        className="btn btn-danger" 
+                                        onClick={() => {
+                                            if (window.confirm('¿Estás seguro de que deseas cerrar sesión?')) {
+                                                onCerrarSesion();
+                                            }
+                                        }}
+                                    >
+                                        Cerrar sesión
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div className="modal-backdrop fade show"></div>
+                </>
+            )}
         </div>
     )
 }
+
+export default Hub;

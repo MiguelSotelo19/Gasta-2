@@ -1,0 +1,289 @@
+/* Variables de color */
+:root {
+    --color-primario: #10b981; /* Verde principal */
+    --color-primario-hover: #059669; /* Verde oscuro hover */
+    --color-fondo-claro: #f8f9fa;
+    --color-texto-gris: #64748b;
+    --color-borde: #e2e8f0;
+    --color-error: #ef4444;
+    --color-exito: #28a745;
+    --color-texto-input: #1e293b;
+}
+
+/* Estilos base */
+.auth-container {
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+.auth-form {
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    padding: 40px;
+    width: 100%;
+    max-width: 450px;
+    border: 1px solid var(--color-borde);
+}
+
+/* Logo y marca */
+.contenedor-logo {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.logo-icon {
+    width: 50px;
+    height: 50px;
+    background: var(--color-primario);
+    border-radius: 12px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 15px;
+}
+
+.logo-icon i {
+    color: white;
+    font-size: 24px;
+}
+
+.texto-marca {
+    font-size: 24px;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 5px;
+}
+
+.subtitulo {
+    color: var(--color-texto-gris);
+    font-size: 14px;
+}
+
+/* Formularios */
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-label {
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 8px;
+    display: block;
+}
+
+.control-formulario {
+    background-color: var(--color-fondo-claro);
+    border: 2px solid var(--color-borde);
+    border-radius: 12px;
+    padding: 12px 16px;
+    font-size: 14px;
+    width: 100%;
+    transition: all 0.3s ease;
+    color: var(--color-texto-input);
+}
+
+.control-formulario::placeholder {
+    color: #94a3b8;
+}
+
+.control-formulario:focus {
+    background-color: white;
+    border-color: var(--color-primario);
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+    outline: none;
+}
+
+/* Campos de contraseña */
+.password-group {
+    position: relative;
+}
+
+.password-input-container {
+    position: relative;
+}
+
+.password-toggle {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    color: var(--color-texto-gris);
+    font-size: 1.1rem;
+}
+
+/* Botones - Estilos verdes */
+.btn {
+    display: block;
+    width: 100%;
+    padding: 12px 24px;
+    font-weight: 600;
+    font-size: 16px;
+    border-radius: 12px;
+    transition: all 0.3s ease;
+    text-align: center;
+    cursor: pointer;
+    margin: 10px 0;
+}
+
+.btn-primario {
+    background: var(--color-primario);
+    color: white;
+    border: 2px solid var(--color-primario);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.btn-primario:hover {
+    background: var(--color-primario-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.btn-secundario {
+    background: white;
+    color: var(--color-primario);
+    border: 2px solid var(--color-primario);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.btn-secundario:hover {
+    background: var(--color-fondo-claro);
+    color: var(--color-primario-hover);
+    border-color: var(--color-primario-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.btn-link {
+    color: var(--color-primario);
+    text-decoration: none;
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    font-size: 14px;
+    display: inline-block;
+    margin-top: 10px;
+}
+
+.btn-link:hover {
+    color: var(--color-primario-hover);
+    text-decoration: underline;
+}
+
+/* Divisores */
+.divisor {
+    display: flex;
+    align-items: center;
+    margin: 1.5rem 0;
+    color: var(--color-texto-gris);
+}
+
+.divisor::before,
+.divisor::after {
+    content: "";
+    flex: 1;
+    border-bottom: 1px solid var(--color-borde);
+}
+
+.divisor::before {
+    margin-right: 10px;
+}
+
+.divisor::after {
+    margin-left: 10px;
+}
+
+.text-center {
+    text-align: center;
+    margin: 1rem 0;
+}
+
+/* Requisitos de contraseña */
+.requisitos-contrasena {
+    background: var(--color-fondo-claro);
+    border: 1px solid var(--color-borde);
+    border-radius: 8px;
+    padding: 12px;
+    margin-top: 10px;
+    font-size: 12px;
+}
+
+.requisito {
+    display: flex;
+    align-items: center;
+    margin-bottom: 5px;
+}
+
+.requisito i {
+    margin-right: 8px;
+    width: 16px;
+    text-align: center;
+}
+
+.requisito.valido {
+    color: var(--color-exito);
+}
+
+.requisito.invalido {
+    color: var(--color-error);
+}
+
+/* Alertas */
+.alert {
+    border-radius: 12px;
+    padding: 12px 16px;
+    margin-bottom: 1rem;
+    font-size: 0.9rem;
+}
+
+.alert-success {
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.alert-error {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+/* Spinner de carga */
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+.loading {
+    display: inline-block;
+    width: 18px;
+    height: 18px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    border-top-color: white;
+    animation: spin 0.8s linear infinite;
+    margin-right: 8px;
+    vertical-align: middle;
+}
+
+/* Responsividad */
+@media (max-width: 480px) {
+    .auth-form {
+        padding: 30px 20px;
+        border-radius: 16px;
+    }
+
+    .texto-marca {
+        font-size: 20px;
+    }
+
+    .btn {
+        padding: 10px 20px;
+        font-size: 15px;
+    }
+}
