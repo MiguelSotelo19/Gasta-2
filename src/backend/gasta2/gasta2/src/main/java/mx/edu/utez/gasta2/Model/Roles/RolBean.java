@@ -25,6 +25,10 @@ public class RolBean {
         this.rol = rol;
     }
 
+    public RolBean(String rol) {
+        this.rol = rol;
+    }
+
     public Long getId() {
         return id;
     }
