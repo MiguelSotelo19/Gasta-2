@@ -2,12 +2,17 @@ package mx.edu.utez.gasta2.Service.Usuarios;
 
 import jakarta.mail.internet.MimeMessage;
 import mx.edu.utez.gasta2.Config.ApiResponse;
+import mx.edu.utez.gasta2.Model.Categorias.CategoriaRepository;
+import mx.edu.utez.gasta2.Model.Espacios.EspacioBean;
+import mx.edu.utez.gasta2.Model.Espacios.EspaciosRepository;
+import mx.edu.utez.gasta2.Model.Gastos.GastoRepository;
 import mx.edu.utez.gasta2.Model.PasswordReset.PasswordReset;
 import mx.edu.utez.gasta2.Model.PasswordReset.PasswordResetRepository;
 import mx.edu.utez.gasta2.Model.Roles.RolBean;
 import mx.edu.utez.gasta2.Model.Roles.RolRepository;
 import mx.edu.utez.gasta2.Model.Usuarios.UsuarioBean;
 import mx.edu.utez.gasta2.Model.Usuarios.UsuariosRepository;
+import mx.edu.utez.gasta2.Model.Usuarios_Espacios.UserEspaciosRepository;
 import mx.edu.utez.gasta2.Model.Usuarios_Espacios.UsuariosEspaciosBean;
 import mx.edu.utez.gasta2.Service.Usuarios_Espacios.Usuarios_Espacio_Service;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,6 +52,19 @@ public class UsuarioService {
 
     @Autowired
     private RolRepository rolRepository;
+
+    @Autowired
+    private GastoRepository gastoRepository;
+
+    @Autowired
+    private CategoriaRepository categoriaRepository;
+
+    @Autowired
+    private UserEspaciosRepository userEspaciosRepository;
+
+    @Autowired
+    private EspaciosRepository espaciosRepository;
+
 
 
     public ResponseEntity<ApiResponse> getAllUsers() {
@@ -204,5 +222,44 @@ public class UsuarioService {
         helper.setText(htmlContent, true);
 
         mailSender.send(message);
+    }
+
+    @Transactional
+    public ResponseEntity<ApiResponse> eliminarCuenta(Long idUsuario) {
+        Optional<UsuarioBean> userFound = repository.findById(idUsuario);
+        if (userFound.isEmpty()) {
+            return new ResponseEntity<>(new ApiResponse(HttpStatus.NOT_FOUND, true, "Usuario no encontrado"), HttpStatus.NOT_FOUND);
+        }
+
+        UsuarioBean usuario = userFound.get();
+
+        // Elimina gastos personales
+        gastoRepository.deleteByUsuarioId(usuario.getId());
+
+        // Elimina espacios creados por el usuario
+        List<UsuariosEspaciosBean> creados = userEspaciosRepository.findAllByUsuarioAndRolRol(usuario, "Administrador");
+
+        for (UsuariosEspaciosBean relacion : creados) {
+            EspacioBean espacio = relacion.getEspacio();
+
+            // Elimina categorías del espacio
+            categoriaRepository.deleteByEspacioId(espacio.getId());
+
+            // Elimina relaciones usuarios_espacios del espacio
+            userEspaciosRepository.deleteAllByEspacio(espacio);
+
+            // Elimina espacio
+            espaciosRepository.delete(espacio);
+        }
+        //Elimina relaciones usuarios_espacios
+        userEspaciosRepository.deleteAllByUsuario(usuario);
+
+        //Eliminar reseteos de contraseña
+        resetRepository.deleteByEmail(usuario.getCorreo());
+
+        //Eliminar usuario
+        repository.delete(usuario);
+
+        return new ResponseEntity<>(new ApiResponse(HttpStatus.OK, false, "Cuenta eliminada exitosamente"), HttpStatus.OK);
     }
 }

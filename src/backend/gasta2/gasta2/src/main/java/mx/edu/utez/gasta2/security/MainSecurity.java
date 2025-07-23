@@ -74,8 +74,10 @@ public class MainSecurity {
                                 .requestMatchers("/api/espacios/crear").hasAnyRole("Administrador")
                                 .requestMatchers("/api/usuarios-espacios/unirse").hasAnyRole("Administrador", "Invitado")
                                 .requestMatchers("/api/usuarios-espacios/change-role").hasAnyRole("Administrador")
+                                .requestMatchers("/api/usuarios/eliminar-cuenta/**").hasAnyRole("Administrador")
                                 .requestMatchers("/api/usuarios/all").hasAnyRole("Administrador", "Invitado")
                                 .requestMatchers("/api/usuarios-espacios/**").hasAnyRole("Administrador", "Invitado")
+
 
 
                                 .anyRequest().authenticated()

@@ -19,6 +19,11 @@ public interface UserEspaciosRepository extends JpaRepository<UsuariosEspaciosBe
 
     Optional<UsuariosEspaciosBean> findByUsuarioIdAndEspacioId(Long idUsuario, Long idEspacio);
 
+    void deleteAllByUsuario(UsuarioBean usuario);
+
+    void deleteAllByEspacio(EspacioBean espacio);
+
+    List<UsuariosEspaciosBean> findAllByUsuarioAndRolRol(UsuarioBean usuario, String rol);
 
     List<UsuariosEspaciosBean> findAllByUsuario_Id(Long idUsuario);
 }
