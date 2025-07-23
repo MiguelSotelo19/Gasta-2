@@ -1,5 +1,5 @@
 {
-  "name": "gasta2",
+  "name": "sgep",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -10,15 +10,24 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "axios": "^1.10.0",
-    "bootstrap": "^5.3.7",
+    "@radix-ui/react-avatar": "^1.1.10",
+    "@radix-ui/react-dropdown-menu": "^2.1.15",
+    "@radix-ui/react-label": "^2.1.7",
+    "@radix-ui/react-select": "^2.2.5",
+    "@radix-ui/react-separator": "^1.1.7",
+    "@radix-ui/react-slot": "^1.2.3",
+    "@tailwindcss/vite": "^4.1.7",
+    "axios": "^1.9.0",
+    "class-variance-authority": "^0.7.1",
+    "lucide-react": "^0.511.0",
+    "next": "^15.3.5",
     "react": "^19.1.0",
-    "react-bootstrap": "^2.10.10",
     "react-dom": "^19.1.0",
-    "react-icons": "^5.5.0",
-    "react-router-dom": "^7.7.0",
+    "react-router-dom": "^7.6.3",
     "react-toastify": "^11.0.5",
-    "sweetalert2": "^11.22.2"
+    "sweetalert2": "^11.22.0",
+    "tailwind-merge": "^3.3.1",
+    "tailwindcss": "^4.1.7"
   },
   "devDependencies": {
     "@eslint/js": "^9.25.0",
