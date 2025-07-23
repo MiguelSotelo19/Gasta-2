@@ -15,5 +15,7 @@ public interface UserEspaciosRepository extends JpaRepository<UsuariosEspaciosBe
 
     List<UsuariosEspaciosBean> findAllByEspacio(EspacioBean espacio);
 
+    Optional<UsuariosEspaciosBean> findByUsuarioAndEspacio(UsuarioBean usuario, EspacioBean espacio);
+
 
 }

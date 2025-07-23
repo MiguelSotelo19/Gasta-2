@@ -38,19 +38,23 @@ public class Usuarios_Espacio_Service {
 
     @Transactional(rollbackFor = {SQLException.class})
     public ResponseEntity<ApiResponse> AsignarEspaciosUsuarios(UsuariosEspaciosBean bean) {
+        // Validar usuario
         if (bean.getUsuario() == null || bean.getUsuario().getId() == null) {
             return new ResponseEntity<>(new ApiResponse(HttpStatus.BAD_REQUEST, true, "El ID del usuario no debe ser vacío"), HttpStatus.BAD_REQUEST);
         }
 
-        if (bean.getEspacio() == null || bean.getEspacio().getId() == null) {
-            return new ResponseEntity<>(new ApiResponse(HttpStatus.BAD_REQUEST, true, "El ID del espacio no debe ser vacío"), HttpStatus.BAD_REQUEST);
-        }
-
+        // Validar rol
         if (bean.getRol() == null || bean.getRol().getId() == null) {
             return new ResponseEntity<>(new ApiResponse(HttpStatus.BAD_REQUEST, true, "El ID del rol no debe ser vacío"), HttpStatus.BAD_REQUEST);
         }
 
-        if (bean.getPorcentajeGasto() == null || bean.getPorcentajeGasto() <= 0 || bean.getPorcentajeGasto() > 100) {
+        // Si se incluye espacio, validar su ID
+        if (bean.getEspacio() != null && bean.getEspacio().getId() == null) {
+            return new ResponseEntity<>(new ApiResponse(HttpStatus.BAD_REQUEST, true, "El ID del espacio no debe ser nulo si se proporciona un espacio"), HttpStatus.BAD_REQUEST);
+        }
+
+        // Si se incluye porcentaje de gasto, validar su rango
+        if (bean.getPorcentajeGasto() != null && (bean.getPorcentajeGasto() <= 0 || bean.getPorcentajeGasto() > 100)) {
             return new ResponseEntity<>(new ApiResponse(HttpStatus.BAD_REQUEST, true, "El porcentaje de gasto no es válido"), HttpStatus.BAD_REQUEST);
         }
 
@@ -59,46 +63,51 @@ public class Usuarios_Espacio_Service {
         return new ResponseEntity<>(new ApiResponse(HttpStatus.CREATED, false, "Asignación registrada correctamente"), HttpStatus.CREATED);
     }
 
+
+    @Transactional(rollbackFor = {SQLException.class})
     public ResponseEntity<ApiResponse> unirseAEspacio(String codigo, Long idUsuario) {
-        // Busca el espacio por el cpdigo
+        // Buscar el espacio por el cpdigo
         Optional<EspacioBean> espacioOptional = espaciosRepository.findByCodigoinvitacion(codigo);
         if (espacioOptional.isEmpty()) {
             return new ResponseEntity<>(new ApiResponse(HttpStatus.NOT_FOUND, true, "Código inválido"), HttpStatus.NOT_FOUND);
         }
         EspacioBean espacio = espacioOptional.get();
 
-        //Verifica que el usuario exista
+        // Verificar que el usuario existe
         Optional<UsuarioBean> usuarioOptional = usuariosRepository.findById(idUsuario);
         if (usuarioOptional.isEmpty()) {
             return new ResponseEntity<>(new ApiResponse(HttpStatus.NOT_FOUND, true, "Usuario no encontrado"), HttpStatus.NOT_FOUND);
         }
         UsuarioBean usuario = usuarioOptional.get();
 
-        // Verificar que no este ya unido
-        boolean yaExiste = repository.existsByUsuarioAndEspacio(usuario, espacio);
-        if (yaExiste) {
+        // Verificar si ya esta en ese espacio
+        Optional<UsuariosEspaciosBean> yaMiembro = repository.findByUsuarioAndEspacio(usuario, espacio);
+        if (yaMiembro.isPresent()) {
             return new ResponseEntity<>(new ApiResponse(HttpStatus.CONFLICT, true, "Ya estás en este espacio"), HttpStatus.CONFLICT);
         }
 
-        //Obtener el rol de invitado
-        RolBean rolInvitado = rolRepository.findById(2L).orElseThrow(() -> new RuntimeException("Rol invitado no encontrado"));
+        // Obtener el rol de Invitaso (Osea el 2)
+        RolBean rolInvitado = rolRepository.findById(2L)
+                .orElseThrow(() -> new RuntimeException("Rol de invitado no encontrado"));
 
-        // alcular el nuevo porcentaje para todos 😭
+        // Obtener miembros actuales del espacio
         List<UsuariosEspaciosBean> miembrosActuales = repository.findAllByEspacio(espacio);
         int totalUsuarios = miembrosActuales.size() + 1;
-        double nuevoPorcentaje = 100.0 / totalUsuarios;
+        double nuevoPorcentaje = Math.round((100.0 / totalUsuarios) * 100.0) / 100.0;
 
-        // Actualizar porcentaje de todos 😭😭
+        // Actualizar porcentaje de gasto para miembros actuales
         for (UsuariosEspaciosBean miembro : miembrosActuales) {
             miembro.setPorcentajeGasto(nuevoPorcentaje);
             repository.save(miembro);
         }
 
-        UsuariosEspaciosBean nuevo = new UsuariosEspaciosBean(usuario, espacio, rolInvitado, nuevoPorcentaje);
-        repository.save(nuevo);
+        // Crear y guardar la nueva relación
+        UsuariosEspaciosBean nuevoMiembro = new UsuariosEspaciosBean(usuario, espacio, rolInvitado, nuevoPorcentaje);
+        repository.save(nuevoMiembro);
 
         return new ResponseEntity<>(new ApiResponse(HttpStatus.CREATED, false, "Te uniste correctamente al espacio"), HttpStatus.CREATED);
     }
+
 
 
 }
