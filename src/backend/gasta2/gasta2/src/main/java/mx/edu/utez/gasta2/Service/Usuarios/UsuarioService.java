@@ -4,8 +4,12 @@ import jakarta.mail.internet.MimeMessage;
 import mx.edu.utez.gasta2.Config.ApiResponse;
 import mx.edu.utez.gasta2.Model.PasswordReset.PasswordReset;
 import mx.edu.utez.gasta2.Model.PasswordReset.PasswordResetRepository;
+import mx.edu.utez.gasta2.Model.Roles.RolBean;
+import mx.edu.utez.gasta2.Model.Roles.RolRepository;
 import mx.edu.utez.gasta2.Model.Usuarios.UsuarioBean;
 import mx.edu.utez.gasta2.Model.Usuarios.UsuariosRepository;
+import mx.edu.utez.gasta2.Model.Usuarios_Espacios.UsuariosEspaciosBean;
+import mx.edu.utez.gasta2.Service.Usuarios_Espacios.Usuarios_Espacio_Service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -37,6 +41,13 @@ public class UsuarioService {
 
     @Autowired
     private PasswordResetRepository resetRepository;
+
+    @Autowired
+    private Usuarios_Espacio_Service usuarios_espacio_service;
+
+    @Autowired
+    private RolRepository rolRepository;
+
 
     //Service para el registro de usuarios
     @Transactional(rollbackFor = {SQLException.class})
@@ -75,7 +86,18 @@ public class UsuarioService {
         String encrypted = passwordEncoder.encode(usuario.getContrasenia());
         usuario.setContrasenia(encrypted);
 
-        return new ResponseEntity<>(new ApiResponse(repository.saveAndFlush(usuario), HttpStatus.CREATED, "Se ha registrado al usuario correctamente"), HttpStatus.CREATED);
+        repository.saveAndFlush(usuario);
+
+        UsuariosEspaciosBean UE = new UsuariosEspaciosBean();
+        Optional<RolBean> rol = rolRepository.findById(1L);
+
+        UE.setUsuario(usuario);
+        UE.setRol(rol.get());
+
+        usuarios_espacio_service.AsignarEspaciosUsuarios(UE);
+
+
+        return new ResponseEntity<>(new ApiResponse( HttpStatus.CREATED, false,"Se ha registrado al usuario correctamente"), HttpStatus.CREATED);
 
     }
 

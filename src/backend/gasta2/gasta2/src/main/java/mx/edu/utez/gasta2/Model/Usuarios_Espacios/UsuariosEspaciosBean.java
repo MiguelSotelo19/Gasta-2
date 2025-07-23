@@ -39,6 +39,11 @@ public class UsuariosEspaciosBean {
         this.porcentajeGasto = porcentajeGasto;
     }
 
+    public UsuariosEspaciosBean(UsuarioBean usuario, RolBean rol) {
+        this.usuario = usuario;
+        this.rol = rol;
+    }
+
     public Long getId() {
         return id;
     }
