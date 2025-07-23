@@ -12,7 +12,7 @@ import "./css/general.css"
 export const Hub = () => {
     const [seccionActiva, setSeccionActiva] = useState("resumen")
     const [espacioActual, setEspacioActual] = useState("Casa Principal")
-    
+
     const sidebar = [
         { id: "resumen", label: "Panel principal", icon: "🏠" },
         { id: "gastos", label: "Gastos", icon: "💰" },
@@ -52,27 +52,27 @@ export const Hub = () => {
     const [usuario, setUsuario] = useState("")
 
     const agregarEspacio = () => {
-    const nombreNormalizado = nuevoEspacio.trim().toLowerCase();
-    if (!nombreNormalizado) {
-        toast.error("El nombre del espacio no puede estar vacío.");
-        return;
-    }
+        const nombreNormalizado = nuevoEspacio.trim().toLowerCase();
+        if (!nombreNormalizado) {
+            toast.error("El nombre del espacio no puede estar vacío.");
+            return;
+        }
 
-    const espaciosUnicos = new Set(spaces.map(space => space.name.toLowerCase()));
-    if (espaciosUnicos.has(nombreNormalizado)) {
-        toast.error("Ese nombre ya está en uso.");
-        return;
-    }
+        const espaciosUnicos = new Set(spaces.map(space => space.name.toLowerCase()));
+        if (espaciosUnicos.has(nombreNormalizado)) {
+            toast.error("Ese nombre ya está en uso.");
+            return;
+        }
 
-    if (espaciosUnicos.size >= 5) {
-        toast.error("Solo puedes crear 5 espacios únicos.");
-        return;
-    }
+        if (espaciosUnicos.size >= 5) {
+            toast.error("Solo puedes crear 5 espacios únicos.");
+            return;
+        }
 
-    toast.success("Espacio agregado correctamente.");
-    setNuevoEspacio("");
-    setModalNuevoEspacioAbierto(false);
-};
+        toast.success("Espacio agregado correctamente.");
+        setNuevoEspacio("");
+        setModalNuevoEspacioAbierto(false);
+    };
 
 
     return (
@@ -99,9 +99,9 @@ export const Hub = () => {
                             Agregar
                         </button>
                     </div>
-                    <select 
-                        className="space-select d-felx pe-3" 
-                        value={espacioActual} 
+                    <select
+                        className="space-select d-felx pe-3"
+                        value={espacioActual}
                         onChange={(e) => setEspacioActual(e.target.value)}
                     >
                         {spaces.map((space, index) => (
@@ -116,7 +116,7 @@ export const Hub = () => {
                     <ul className="nav-list">
                         {sidebar.map((item) => (
                             <li key={item.id} className="nav-item">
-                                <button 
+                                <button
                                     className={`nav-button ${seccionActiva === item.id ? "active" : ""}`}
                                     onClick={() => setSeccionActiva(item.id)}>
                                     <span className="nav-icon">{item.icon}</span>
@@ -133,7 +133,7 @@ export const Hub = () => {
                     <div className="user-info">
                         <p>Administrador</p>
                     </div>
-                    <button className="icon-button"onClick={() => setModalConfiguracionAbierto(true)}>
+                    <button className="icon-button" onClick={() => setModalConfiguracionAbierto(true)}>
                         ⚙️
                     </button>
                 </div>
@@ -147,7 +147,7 @@ export const Hub = () => {
                     </div>
                     <div className="top-bar-actions">
                         <button className="icon-button">🔔</button>
-                        <button className="icon-button"onClick={''} >
+                        <button className="icon-button" onClick={''} >
                             👤
                         </button>
                     </div>
@@ -169,7 +169,7 @@ export const Hub = () => {
                                     </button>
                                 </div>
                                 <div className="modal-body">
-                                    <input type="text" className="form-control" placeholder="Nombre del nuevo espacio" value={nuevoEspacio} 
+                                    <input type="text" className="form-control" placeholder="Nombre del nuevo espacio" value={nuevoEspacio}
                                         onChange={(e) => setNuevoEspacio(e.target.value)}
                                     />
                                 </div>
@@ -203,7 +203,7 @@ export const Hub = () => {
                                 <div className="modal-body">
                                     <div className="mb-3">
                                         <label className="form-label">Nombre</label>
-                                        <input type="text" className="form-control" value={''} readOnly/>
+                                        <input type="text" className="form-control" value={''} readOnly />
                                     </div>
                                     <div className="mb-3">
                                         <label className="form-label">Correo electrónico</label>
@@ -219,9 +219,9 @@ export const Hub = () => {
                                         Cerrar
                                     </button>
                                     <button type="button" className="btn btn-danger" onClick={() => {
-                                            
-                                        }}
-                                        >
+
+                                    }}
+                                    >
                                         Cerrar sesión
                                     </button>
                                 </div>
