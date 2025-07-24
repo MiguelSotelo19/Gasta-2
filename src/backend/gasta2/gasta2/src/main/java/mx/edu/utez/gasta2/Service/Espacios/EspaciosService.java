@@ -54,6 +54,7 @@ public class EspaciosService {
 
         String codigo = generarCodigoInvitacionUnico();
         espacioBean.setCodigoinvitacion(codigo);
+        espacioBean.setStatus(true);
 
         EspacioBean espacioGuardado = repository.saveAndFlush(espacioBean);
 
@@ -68,11 +69,10 @@ public class EspaciosService {
             return new ResponseEntity<>(new ApiResponse(HttpStatus.FORBIDDEN, true, "El usuario ya no cuenta con espacios disponibles"), HttpStatus.FORBIDDEN);
         }
 
-        // Restar un espacio disponible
         user.setEspaciosdisponibles(user.getEspaciosdisponibles() - 1);
         usuariosRepository.save(user);
 
-        Optional<RolBean> optionalRolBean = rolRepository.findById(1L); // Rol de admin
+        Optional<RolBean> optionalRolBean = rolRepository.findById(1L); // Rol de administrador
         if (optionalRolBean.isEmpty()) {
             return new ResponseEntity<>(new ApiResponse(HttpStatus.BAD_REQUEST, true, "El rol no se encontró"), HttpStatus.BAD_REQUEST);
         }

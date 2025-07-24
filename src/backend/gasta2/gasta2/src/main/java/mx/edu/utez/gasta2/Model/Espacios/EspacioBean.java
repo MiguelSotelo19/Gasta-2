@@ -21,6 +21,9 @@ public class EspacioBean {
     @Column(length = 5)
     private String codigoinvitacion;
 
+    @Column(columnDefinition = "BOOLEAN")
+    private Boolean status;
+
     @JsonIgnore
     @OneToMany(mappedBy = "espacio", fetch = FetchType.LAZY)
     private Set<CategoriaBean> categoriaBeans;
@@ -50,6 +53,12 @@ public class EspacioBean {
     public EspacioBean() {
     }
 
+    public EspacioBean(String nombre, String codigoinvitacion, Boolean status) {
+        this.nombre = nombre;
+        this.codigoinvitacion = codigoinvitacion;
+        this.status = status;
+    }
+
     public Long getId() {
         return id;
     }
@@ -72,6 +81,14 @@ public class EspacioBean {
 
     public void setCodigoinvitacion(String codigoinvitacion) {
         this.codigoinvitacion = codigoinvitacion;
+    }
+
+    public Boolean getStatus() {
+        return status;
+    }
+
+    public void setStatus(Boolean status) {
+        this.status = status;
     }
 
     public Set<CategoriaBean> getCategoriaBeans() {
