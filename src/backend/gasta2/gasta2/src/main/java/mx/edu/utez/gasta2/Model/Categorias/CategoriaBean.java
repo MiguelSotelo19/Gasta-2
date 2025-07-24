@@ -15,6 +15,18 @@ public class CategoriaBean {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(length = 50)
+    private String nombre;
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "tipogasto", fetch = FetchType.LAZY)
+    private Set<GastoBean> gastoBeans;
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "fk_id_espacio")
+    @JsonIgnore
+    private EspacioBean espacio;
+
     public CategoriaBean() {
     }
 
@@ -22,6 +34,11 @@ public class CategoriaBean {
         this.id = id;
         this.nombre = nombre;
         this.gastoBeans = gastoBeans;
+    }
+
+    public CategoriaBean(String nombre, EspacioBean espacio) {
+        this.nombre = nombre;
+        this.espacio = espacio;
     }
 
     public Long getId() {
@@ -48,14 +65,11 @@ public class CategoriaBean {
         this.gastoBeans = gastoBeans;
     }
 
-    @Column(length = 50)
-    private String nombre;
+    public EspacioBean getEspacio() {
+        return espacio;
+    }
 
-    @JsonIgnore
-    @OneToMany(mappedBy = "tipogasto", fetch = FetchType.LAZY)
-    private Set<GastoBean> gastoBeans;
-
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "fk_id_espacio")
-    private EspacioBean espacio;
+    public void setEspacio(EspacioBean espacio) {
+        this.espacio = espacio;
+    }
 }
