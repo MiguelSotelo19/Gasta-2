@@ -2,6 +2,7 @@ import "./css/miembros.css"
 import "./css/general.css"
 import axiosInstance from "../services/axiosInstance";
 import { useEffect, useState } from "react";
+import ModalMiembros from "../components/modalMiembros";
 
 export const Miembros = ({ espacioActual, nombreEspacio }) => {
     const API_URL = import.meta.env.VITE_API_URL;
@@ -49,6 +50,18 @@ export const Miembros = ({ espacioActual, nombreEspacio }) => {
 
     }
 
+    const actualizarRol = async () => {
+
+    }
+
+    const eliminarUsuario = async () => {
+
+    }
+
+    const actualizarPorcentajes = async () => {
+
+    }
+
     return (
         <>
 
@@ -89,14 +102,26 @@ export const Miembros = ({ espacioActual, nombreEspacio }) => {
                                 Administra los permisos y porcentajes de contribución de cada miembro.
                             </p>
                         )}
-
+                        <div>
+                            {espacioActual.rol === "Administrador" && (
+                                <ModalMiembros
+                                nombreEspacio={nombreEspacio}
+                                espacioActual={espacioActual}
+                                miembrosDelEspacio={miembrosDelEspacio}
+                                onDeleteMember={eliminarUsuario}
+                                onMakeAdmin={actualizarRol}
+                                onUpdateSpace={actualizarPorcentajes}
+                                />
+                            )}
+                            
+                        </div>
                     </div>
                     <div className="card-content">
                         {miembrosDelEspacio.map((member, index) => (
                             <div key={index} className="member-item">
                                 <div className="member-info">
                                     <div className="member-details">
-                                        <h5>👤 {member.nombreUsuario}</h5>
+                                        <h5>{member.rol === "Administrador" ? "👑" : "👤"} {member.nombreUsuario}</h5>
                                         <div className="member-role">{member.rol}</div>
                                     </div>
                                 </div>
