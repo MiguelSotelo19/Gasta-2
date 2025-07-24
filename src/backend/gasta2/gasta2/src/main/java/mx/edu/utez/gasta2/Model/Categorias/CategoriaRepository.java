@@ -12,4 +12,5 @@ public interface CategoriaRepository extends JpaRepository<CategoriaBean, Long> 
     Optional<CategoriaBean>findByNombreAndEspacio_Id(String nombre, Long EspacioId);
 
     List<CategoriaBean>findAllByEspacio_Id(Long id);
+
 }

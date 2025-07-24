@@ -18,10 +18,22 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
+@CrossOrigin(origins = {"http://localhost:5173"}, allowCredentials = "true")
 @RequestMapping("/api/usuarios-espacios")
 public class Usuarios_Espacios_Controller {
     @Autowired
     private Usuarios_Espacio_Service service;
+
+
+    @GetMapping("/all")
+    public ResponseEntity<ApiResponse> getAllByUsuario(@RequestParam Long idUsuario) {
+        return service.getAllByUsuario(idUsuario);
+    }
+
+    @GetMapping("/all-global")
+    public ResponseEntity<ApiResponse> getAll() {
+        return service.getAll();
+    }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ApiResponse> handleValidationErrors(MethodArgumentNotValidException ex) {

@@ -83,7 +83,9 @@ public class MainSecurity {
                                 .requestMatchers("/api/categorias/").hasAnyRole("Administrador", "Invitado")
                                 .requestMatchers("/api/categorias/update/**").hasAnyRole("Administrador")
                                 .requestMatchers("/api/categorias/delete/**").hasAnyRole("Administrador")
-
+                                .requestMatchers("/api/usuarios/eliminar-cuenta/**").hasAnyRole("Administrador")
+                                .requestMatchers("/api/usuarios/all").hasAnyRole("Administrador", "Invitado")
+                                .requestMatchers("/api/usuarios-espacios/**").hasAnyRole("Administrador", "Invitado")
                                 .anyRequest().authenticated()
                 )
                 .httpBasic(Customizer.withDefaults())
