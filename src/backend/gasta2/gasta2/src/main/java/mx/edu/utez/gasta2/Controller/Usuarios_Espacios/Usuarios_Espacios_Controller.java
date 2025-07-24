@@ -1,6 +1,9 @@
 package mx.edu.utez.gasta2.Controller.Usuarios_Espacios;
 
 import mx.edu.utez.gasta2.Config.ApiResponse;
+import mx.edu.utez.gasta2.Model.Espacios.DTO.EspacioIncompletoDTO;
+import mx.edu.utez.gasta2.Model.Espacios.EspacioBean;
+import mx.edu.utez.gasta2.Model.Usuarios_Espacios.DTO.AsignarPorcentajeDTO;
 import mx.edu.utez.gasta2.Model.Usuarios_Espacios.DTO.ChangeRolDTO;
 import mx.edu.utez.gasta2.Model.Usuarios_Espacios.DTO.UnirseEspacioDTO;
 import mx.edu.utez.gasta2.Service.Usuarios_Espacios.Usuarios_Espacio_Service;
@@ -39,8 +42,42 @@ public class Usuarios_Espacios_Controller {
         return service.unirseAEspacio(dto.getCodigoEspacio(), dto.getIdUsuario());
     }
 
-    @PatchMapping("/change-role")
+    @PutMapping("/change-role")
     public ResponseEntity<ApiResponse> cambiarRol(@Validated(ChangeRolDTO.changeRole.class) @RequestBody ChangeRolDTO dto){
         return service.changeRolToAdmin(dto.getIdSpace(), dto.getIdAdmin(), dto.getIdUser());
     }
+
+    // 2. Usuario sale de un espacio
+    @DeleteMapping("/{idEspacio}/usuarios/{idUsuario}")
+    public ResponseEntity<ApiResponse> salirDelEspacio(@PathVariable Long idEspacio, @PathVariable Long idUsuario) {
+        return service.salirDeEspacio(idEspacio, idUsuario);
+    }
+
+    // 3. Calcular y reactivar espacio
+    @PostMapping("/{idEspacio}/reasignar-porcentaje")
+    public ResponseEntity<ApiResponse> recalcularPorcentaje(@PathVariable Long idEspacio) {
+        return service.recalcularPorcentaje(idEspacio);
+    }
+
+    // 4. Obtener espacios con porcentaje faltante
+    @GetMapping("/porcentaje-faltante")
+    public ResponseEntity<ApiResponse> getEspaciosConPorcentajeFaltante() {
+        List<EspacioIncompletoDTO> espacios = service.obtenerEspaciosIncompletos();
+        return new ResponseEntity<>(
+                new ApiResponse(espacios, HttpStatus.OK, "Espacios con porcentaje faltante"),
+                HttpStatus.OK
+        );
+    }
+
+
+    // 5. Asignar porcentaje faltante manualmente a un usuario
+    @PostMapping("/{idEspacio}/usuarios/{idUsuario}/asignar-porcentaje")
+    public ResponseEntity<ApiResponse> asignarPorcentajeManual(
+            @PathVariable Long idEspacio,
+            @PathVariable Long idUsuario,
+            @RequestBody @Validated AsignarPorcentajeDTO dto) {
+        return service.asignarPorcentajeManual(idEspacio, idUsuario, dto.getPorcentaje());
+    }
+
+
 }

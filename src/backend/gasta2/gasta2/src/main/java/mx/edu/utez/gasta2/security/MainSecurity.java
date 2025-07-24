@@ -5,6 +5,7 @@ import mx.edu.utez.gasta2.security.jwt.JwtAuthenticationFilter;
 import mx.edu.utez.gasta2.security.service.UserDetailsServiceImpl;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -74,7 +75,10 @@ public class MainSecurity {
                                 .requestMatchers("/api/espacios/crear").hasAnyRole("Administrador")
                                 .requestMatchers("/api/usuarios-espacios/unirse").hasAnyRole("Administrador", "Invitado")
                                 .requestMatchers("/api/usuarios-espacios/change-role").hasAnyRole("Administrador")
-
+                                .requestMatchers(HttpMethod.DELETE, "/api/usuarios-espacios/*/usuarios/*").hasAnyRole("Administrador", "Invitado")
+                                .requestMatchers("/api/usuarios-espacios/porcentaje-faltante").hasAnyRole("Administrador", "Invitado")
+                                .requestMatchers(HttpMethod.POST, "/api/usuarios-espacios/*/reasignar-porcentaje").hasAnyRole("Administrador")
+                                .requestMatchers(HttpMethod.POST, "/api/usuarios-espacios/*/usuarios/*/asignar-porcentaje").hasAnyRole("Administrador")
 
                                 .anyRequest().authenticated()
                 )

@@ -1,6 +1,7 @@
 package mx.edu.utez.gasta2.Service.Usuarios_Espacios;
 
 import mx.edu.utez.gasta2.Config.ApiResponse;
+import mx.edu.utez.gasta2.Model.Espacios.DTO.EspacioIncompletoDTO;
 import mx.edu.utez.gasta2.Model.Espacios.EspacioBean;
 import mx.edu.utez.gasta2.Model.Espacios.EspaciosRepository;
 import mx.edu.utez.gasta2.Model.Roles.RolBean;
@@ -66,7 +67,7 @@ public class Usuarios_Espacio_Service {
 
     @Transactional(rollbackFor = {SQLException.class})
     public ResponseEntity<ApiResponse> unirseAEspacio(String codigo, Long idUsuario) {
-        // Buscar el espacio por el cpdigo
+        // Buscar el espacio por el código
         Optional<EspacioBean> espacioOptional = espaciosRepository.findByCodigoinvitacion(codigo);
         if (espacioOptional.isEmpty()) {
             return new ResponseEntity<>(new ApiResponse(HttpStatus.NOT_FOUND, true, "Código inválido"), HttpStatus.NOT_FOUND);
@@ -80,13 +81,13 @@ public class Usuarios_Espacio_Service {
         }
         UsuarioBean usuario = usuarioOptional.get();
 
-        // Verificar si ya esta en ese espacio
+        // Verificar si ya está en ese espacio
         Optional<UsuariosEspaciosBean> yaMiembro = repository.findByUsuarioAndEspacio(usuario, espacio);
         if (yaMiembro.isPresent()) {
             return new ResponseEntity<>(new ApiResponse(HttpStatus.CONFLICT, true, "Ya estás en este espacio"), HttpStatus.CONFLICT);
         }
 
-        // Obtener el rol de Invitaso (Osea el 2)
+        // Obtener el rol de Invitado (id = 2)
         RolBean rolInvitado = rolRepository.findById(2L)
                 .orElseThrow(() -> new RuntimeException("Rol de invitado no encontrado"));
 
@@ -95,18 +96,30 @@ public class Usuarios_Espacio_Service {
         int totalUsuarios = miembrosActuales.size() + 1;
         double nuevoPorcentaje = Math.round((100.0 / totalUsuarios) * 100.0) / 100.0;
 
-        // Actualizar porcentaje de gasto para miembros actuales
+        // Recalcular porcentaje para todos los miembros
         for (UsuariosEspaciosBean miembro : miembrosActuales) {
             miembro.setPorcentajeGasto(nuevoPorcentaje);
             repository.save(miembro);
         }
 
-        // Crear y guardar la nueva relación
-        UsuariosEspaciosBean nuevoMiembro = new UsuariosEspaciosBean(usuario, espacio, rolInvitado, nuevoPorcentaje);
-        repository.save(nuevoMiembro);
+        // Buscar si ya existe una relación sin espacio (por registro)
+        Optional<UsuariosEspaciosBean> relacionExistente = repository.findByUsuarioAndEspacioIsNull(usuario);
+
+        if (relacionExistente.isPresent()) {
+            UsuariosEspaciosBean relacion = relacionExistente.get();
+            relacion.setEspacio(espacio);
+            relacion.setRol(rolInvitado);
+            relacion.setPorcentajeGasto(nuevoPorcentaje);
+            repository.save(relacion);
+        } else {
+            // Si no tiene relación previa, se crea una nueva (por si acaso)
+            UsuariosEspaciosBean nuevoMiembro = new UsuariosEspaciosBean(usuario, espacio, rolInvitado, nuevoPorcentaje);
+            repository.save(nuevoMiembro);
+        }
 
         return new ResponseEntity<>(new ApiResponse(HttpStatus.CREATED, false, "Te uniste correctamente al espacio"), HttpStatus.CREATED);
     }
+
 
     //Cambiar el rol del usuario
     @Transactional(rollbackFor = {SQLException.class})
@@ -142,6 +155,124 @@ public class Usuarios_Espacio_Service {
 
         return new ResponseEntity<>(new ApiResponse(HttpStatus.OK, false, "Rol cambiado a administrador correctamente"), HttpStatus.OK);
     }
+
+    @Transactional(rollbackFor = SQLException.class)
+    public ResponseEntity<ApiResponse> salirDeEspacio(Long idEspacio, Long idUsuario) {
+        Optional<UsuarioBean> usuarioOpt = usuariosRepository.findById(idUsuario);
+        Optional<EspacioBean> espacioOpt = espaciosRepository.findById(idEspacio);
+
+        if (usuarioOpt.isEmpty() || espacioOpt.isEmpty()) {
+            return new ResponseEntity<>(new ApiResponse(HttpStatus.NOT_FOUND, true, "Usuario o espacio no encontrado"), HttpStatus.NOT_FOUND);
+        }
+
+        UsuarioBean usuario = usuarioOpt.get();
+        EspacioBean espacio = espacioOpt.get();
+
+        // Buscar relación
+        Optional<UsuariosEspaciosBean> relacionOpt = repository.findByUsuarioAndEspacio(usuario, espacio);
+        if (relacionOpt.isEmpty()) {
+            return new ResponseEntity<>(new ApiResponse(HttpStatus.NOT_FOUND, true, "Relación no encontrada"), HttpStatus.NOT_FOUND);
+        }
+
+        UsuariosEspaciosBean relacion = relacionOpt.get();
+
+        // Eliminar la relación
+        repository.delete(relacion);
+
+        // Marcar espacio como inactivo
+        espacio.setStatus(false);
+        espaciosRepository.save(espacio);
+
+        return new ResponseEntity<>(new ApiResponse(HttpStatus.OK, false, "Usuario eliminado y espacio desactivado"), HttpStatus.OK);
+    }
+
+
+
+    @Transactional(rollbackFor = SQLException.class)
+    public ResponseEntity<ApiResponse> recalcularPorcentaje(Long idEspacio) {
+        Optional<EspacioBean> espacioOpt = espaciosRepository.findById(idEspacio);
+        if (espacioOpt.isEmpty()) {
+            return new ResponseEntity<>(new ApiResponse(HttpStatus.NOT_FOUND, true, "Espacio no encontrado"), HttpStatus.NOT_FOUND);
+        }
+
+        EspacioBean espacio = espacioOpt.get();
+        List<UsuariosEspaciosBean> miembros = repository.findAllByEspacio(espacio);
+
+        if (miembros.isEmpty()) {
+            return new ResponseEntity<>(new ApiResponse(HttpStatus.BAD_REQUEST, true, "No hay miembros en el espacio"), HttpStatus.BAD_REQUEST);
+        }
+
+        double nuevoPorcentaje = 100.0 / miembros.size();
+        for (UsuariosEspaciosBean miembro : miembros) {
+            miembro.setPorcentajeGasto(Math.round(nuevoPorcentaje * 100.0) / 100.0); // 2 decimales
+            repository.save(miembro);
+        }
+
+        // Activar espacio
+        espacio.setStatus(true);
+        espaciosRepository.save(espacio);
+
+        return new ResponseEntity<>(new ApiResponse(HttpStatus.OK, false, "Porcentajes recalculados y espacio reactivado"), HttpStatus.OK);
+    }
+
+    @Transactional(readOnly = true)
+    public List<EspacioIncompletoDTO> obtenerEspaciosIncompletos() {
+        List<EspacioBean> espaciosInactivos = espaciosRepository.findByStatusFalse();
+
+        return espaciosInactivos.stream()
+                .map(espacio -> {
+                    List<UsuariosEspaciosBean> relaciones = repository.findAllByEspacio(espacio);
+                    double suma = relaciones.stream()
+                            .mapToDouble(r -> r.getPorcentajeGasto() != null ? r.getPorcentajeGasto() : 0)
+                            .sum();
+                    double faltante = 100.0 - suma;
+                    return new EspacioIncompletoDTO(espacio, faltante);
+                })
+                .filter(dto -> dto.getPorcentajeFaltante() > 0)
+                .toList();
+    }
+
+
+    @Transactional(rollbackFor = SQLException.class)
+    public ResponseEntity<ApiResponse> asignarPorcentajeManual(Long idEspacio, Long idUsuario, double porcentaje) {
+        Optional<EspacioBean> espacioOpt = espaciosRepository.findById(idEspacio);
+        Optional<UsuarioBean> usuarioOpt = usuariosRepository.findById(idUsuario);
+
+        if (espacioOpt.isEmpty() || usuarioOpt.isEmpty()) {
+            return new ResponseEntity<>(new ApiResponse(HttpStatus.NOT_FOUND, true, "Usuario o espacio no encontrado"), HttpStatus.NOT_FOUND);
+        }
+
+        EspacioBean espacio = espacioOpt.get();
+        UsuarioBean usuario = usuarioOpt.get();
+
+        Optional<UsuariosEspaciosBean> relacionOpt = repository.findByUsuarioAndEspacio(usuario, espacio);
+        if (relacionOpt.isEmpty()) {
+            return new ResponseEntity<>(new ApiResponse(HttpStatus.NOT_FOUND, true, "Relación usuario-espacio no encontrada"), HttpStatus.NOT_FOUND);
+        }
+
+        UsuariosEspaciosBean relacion = relacionOpt.get();
+
+        double porcentajeActual = relacion.getPorcentajeGasto() != null ? relacion.getPorcentajeGasto() : 0;
+        double nuevoPorcentaje = Math.round((porcentajeActual + porcentaje) * 100.0) / 100.0;
+
+        relacion.setPorcentajeGasto(nuevoPorcentaje);
+        repository.save(relacion);
+
+        // Verificar si ya suman 100
+        List<UsuariosEspaciosBean> relaciones = repository.findAllByEspacio(espacio);
+        double suma = relaciones.stream()
+                .mapToDouble(r -> r.getPorcentajeGasto() != null ? r.getPorcentajeGasto() : 0)
+                .sum();
+
+        if (Math.round(suma * 100.0) / 100.0 == 100.0) {
+            espacio.setStatus(true);
+            espaciosRepository.save(espacio);
+        }
+
+        return new ResponseEntity<>(new ApiResponse(HttpStatus.OK, false, "Porcentaje asignado correctamente"), HttpStatus.OK);
+    }
+
+
 
 
 

@@ -19,5 +19,9 @@ public interface UserEspaciosRepository extends JpaRepository<UsuariosEspaciosBe
 
     Optional<UsuariosEspaciosBean> findByUsuarioIdAndEspacioId(Long idUsuario, Long idEspacio);
 
+    Optional<UsuariosEspaciosBean> findByUsuarioAndEspacioIsNull(UsuarioBean usuario);
+
+
+
 
 }
