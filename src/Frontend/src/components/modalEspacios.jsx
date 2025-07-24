@@ -11,17 +11,23 @@ export default function ModalEspacios({
   nuevoEspacio,
   setNuevoEspacio,
   agregarEspacio,
+  unirseAEspacio,
+  codigoEspacio,
+  setCodigoEspacio
 }) {
-  const [codigoEspacio, setCodigoEspacio] = useState("")
   const [isLoading, setIsLoading] = useState(false)
 
   const handleUnirse = async () => {
-    setIsLoading(true)
-    setTimeout(() => {
-      setIsLoading(false)
-      console.log("Funcionalidad de unión aún no implementada.")
-    }, 1000)
-  }
+    setIsLoading(true);
+    try {
+      await unirseAEspacio(codigoEspacio);
+    } catch (error) {
+      console.error("Error desde el modal:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
 
   const handleCrear = async () => {
     setIsLoading(true)
@@ -133,8 +139,10 @@ export default function ModalEspacios({
                         const value = e.target.value;
                         const nums = value.replace(/\D/g, "").slice(0, 5);
                         setCodigoEspacio(nums);
-                      }} className="modal-espacios-input-field modal-espacios-input-with-padding"
+                      }}
+                      className="modal-espacios-input-field modal-espacios-input-with-padding"
                     />
+
                   </div>
                 </div>
                 <div className="modal-espacios-info-box modal-espacios-info-box-blue">

@@ -13,6 +13,7 @@ import axiosInstance from "../services/axiosInstance"
 import { Button } from "../components/ui/button"
 import ModalEspacios from "../components/modalEspacios"
 import { useNavigate } from "react-router-dom"
+import { Generico } from "./Generico"
 
 export const Hub = () => {
     const API_URL = import.meta.env.VITE_API_URL;
@@ -20,6 +21,8 @@ export const Hub = () => {
     const urlUser = `${API_URL}/api/usuarios/all`
     const urlEspaciosUser = `${API_URL}/api/usuarios-espacios/all?idUsuario=`
     const urlCrearEspacio = `${API_URL}/api/espacios/crear`
+    const urlEspaciosUserAll = `${API_URL}/api/espacios/`
+    const urlUnirseEspacio = `${API_URL}/api/usuarios-espacios/unirse`;
 
     const navigate = useNavigate();
     const [seccionActiva, setSeccionActiva] = useState("resumen")
@@ -30,15 +33,19 @@ export const Hub = () => {
     const [modoModal, setModoModal] = useState("opciones");
     const [usuario, setUsuario] = useState("")
     const [espaciosDisponibles, setEspaciosDisponibles] = useState(0);
-    const [espacios, setEspacios] = useState([])
+    const [espacios, setEspacios] = useState([]) //Espacios donde está el usuario, es a la tabla interseccion
+    const [todosEspacios, setTodosEspacios] = useState([]) //Todos los espacios, incluyen el codigo para unirse
     const [nombre, setNombre] = useState("")
     const [correo, setCorreo] = useState("")
+    const [codigoEspacio, setCodigoEspacio] = useState("");
+
 
     useEffect(() => {
         console.log("userId:", userId);
         console.log("token :", localStorage.getItem("accessToken"))
         getUser();
         getEspacios();
+        getTodosEspacios()
     }, []);
 
     const sidebar = [
@@ -50,7 +57,7 @@ export const Hub = () => {
     ]
 
     const renderContent = () => {
-        if (!espacioActual) return <div className="p-4">Cargando...</div>; // Evita fallos si aún no está definido
+        if (!espacioActual) return <Generico />;
 
         switch (seccionActiva) {
             case "resumen":
@@ -88,14 +95,26 @@ export const Hub = () => {
         try {
             const url = urlEspaciosUser + userId
             const respuesta = await axiosInstance(url)
-            const espaciosData = respuesta.data.data;
+            const espaciosData = respuesta.data.data.filter((espacio) => espacio.nombreEspacio);
+
             setEspacios(espaciosData);
             console.log("espaciosdata: ", espaciosData)
-            console.log("getespacios: ", respuesta.data.data)
-            if (!espacioActual && espaciosData.length > 0) {
+            if (!espacioActual != null && espaciosData.length > 0) {
                 setEspacioActual(espaciosData[0]);
+            } else {
+                setEspacioActual(null)
             }
             console.log("espacioActual: ", espacioActual)
+        } catch (e) {
+            console.log("errorGetEspacios: ", e)
+        }
+    }
+
+    const getTodosEspacios = async () => {
+        try {
+            const respuesta = await axiosInstance(urlEspaciosUserAll)
+            setTodosEspacios(respuesta.data.data);
+            console.log("todos los espacios: ", respuesta.data.data)
         } catch (e) {
             console.log("errorGetEspacios: ", e)
         }
@@ -110,8 +129,7 @@ export const Hub = () => {
         }
 
         const espaciosUnicos = new Set(
-            espacios
-                .filter((espacio) => espacio.nombreEspacio) // filtra nulos o undefined
+            espacios.filter((espacio) => espacio.nombreEspacio)
                 .map((espacio) => espacio.nombreEspacio.toLowerCase())
         );
 
@@ -158,6 +176,60 @@ export const Hub = () => {
             }
         }
 
+    };
+
+    const unirseAEspacio = async (codigoEspacio) => {
+        try {
+            const idUsuario = parseInt(localStorage.getItem("userId"));
+
+            if (!idUsuario || !codigoEspacio) {
+                toast.error("Faltan datos necesarios");
+                return;
+            }
+
+            if (!/^\d{5}$/.test(codigoEspacio)) {
+                toast.error("El código debe tener 5 dígitos");
+                return;
+            }
+
+            const espacioCoincidente = todosEspacios.find((espacio) => espacio.codigoinvitacion === codigoEspacio);
+
+            if (!espacioCoincidente) {
+                toast.error("El código no corresponde a ningún espacio existente");
+                return;
+            }
+
+            const yaUnido = espacios.some((espacio) => espacio.nombreEspacio === espacioCoincidente.nombre);
+
+            if (yaUnido) {
+                toast.error("Ya estás dentro de este espacio");
+                return;
+            }
+
+            const parametros = {
+                idUsuario,
+                codigoEspacio
+            };
+
+            const response = await axiosInstance.post(urlUnirseEspacio, parametros);
+
+            console.log("Unido exitosamente:", response.data);
+            toast.success("Te has unido al espacio correctamente");
+
+            await getEspacios();
+
+            setModalNuevoEspacioAbierto(false);
+            setModoModal("opciones");
+
+        } catch (error) {
+            console.error("Error al unirse:", error);
+
+            if (error.response?.status === 409) {
+                toast.error("Ya estás dentro de este espacio");
+            } else {
+                toast.error("No fue posible unirse al espacio");
+            }
+        }
     };
 
     const cerrarSesion = async () => {
@@ -211,7 +283,7 @@ export const Hub = () => {
                             <option disabled>No tienes espacios. ¡Únete o crea alguno!</option>
                         ) : (
                             espacios.map((espacio, index) => (
-                                <option className="capitalize" key={index} value={espacio.nombreEspacio}>
+                                <option key={index} value={espacio.nombreEspacio}>
                                     {espacio.nombreEspacio} {espacio.rol === "Administrador" ? "(Admin)" : ""}
                                 </option>
                             ))
@@ -247,8 +319,7 @@ export const Hub = () => {
             <div className="main-content">
                 <header className="top-bar">
                     <div className="search-container">
-                        <span className="search-icon">🔍</span>
-                        <input type="text" placeholder="Buscar gastos, miembros..." className="search-input" />
+                        <span className="search-icon"></span>
                     </div>
                     <div className="top-bar-actions">
                         <button className="icon-button">🔔</button>
@@ -269,8 +340,10 @@ export const Hub = () => {
                 nuevoEspacio={nuevoEspacio}
                 setNuevoEspacio={setNuevoEspacio}
                 agregarEspacio={agregarEspacio}
+                unirseAEspacio={unirseAEspacio}
+                codigoEspacio={codigoEspacio}
+                setCodigoEspacio={setCodigoEspacio}
             />
-
 
             {modalConfiguracionAbierto && (
                 <>
