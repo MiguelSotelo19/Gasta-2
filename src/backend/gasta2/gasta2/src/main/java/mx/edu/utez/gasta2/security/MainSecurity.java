@@ -79,7 +79,9 @@ public class MainSecurity {
                                 .requestMatchers("/api/usuarios-espacios/porcentaje-faltante").hasAnyRole("Administrador", "Invitado")
                                 .requestMatchers(HttpMethod.POST, "/api/usuarios-espacios/*/reasignar-porcentaje").hasAnyRole("Administrador")
                                 .requestMatchers(HttpMethod.POST, "/api/usuarios-espacios/*/usuarios/*/asignar-porcentaje").hasAnyRole("Administrador")
-
+                                .requestMatchers("/api/usuarios/eliminar-cuenta/**").hasAnyRole("Administrador")
+                                .requestMatchers("/api/usuarios/all").hasAnyRole("Administrador", "Invitado")
+                                .requestMatchers("/api/usuarios-espacios/**").hasAnyRole("Administrador", "Invitado")
                                 .anyRequest().authenticated()
                 )
                 .httpBasic(Customizer.withDefaults())

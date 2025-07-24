@@ -18,6 +18,11 @@ public class UsuariosController {
     @Autowired
     private UsuarioService service;
 
+    @GetMapping("/all")
+    public ResponseEntity<ApiResponse> getAllUsuarios() {
+        return service.getAllUsers();
+    }
+
     @PostMapping("/registrar")
     public ResponseEntity<ApiResponse> registrarUsuario(@RequestBody UsuarioDTO dto){
         return service.saveUser(dto.toEntity());
@@ -37,4 +42,10 @@ public class UsuariosController {
     public ResponseEntity<ApiResponse> resetPassword(@RequestBody PasswordResetDTO dto) {
         return service.newPassword(dto.getCorreo(), dto.getCodigo(), dto.getPassword());
     }
+
+    @DeleteMapping("/eliminar-cuenta/{id}")
+    public ResponseEntity<ApiResponse> eliminarCuenta(@PathVariable Long id) {
+        return service.eliminarCuenta(id);
+    }
+
 }
