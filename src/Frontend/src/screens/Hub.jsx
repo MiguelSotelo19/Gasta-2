@@ -8,8 +8,11 @@ import { Categorias } from "./Categorias"
 import Resumen from "./Resumen"
 import "./css/layout.css"
 import "./css/general.css"
+import "../components/css/modal-espacios.css"
 import axiosInstance from "../services/axiosInstance"
 import { Button } from "../components/ui/button"
+import ModalEspacios from "../components/modalEspacios"
+import { useNavigate } from "react-router-dom"
 
 export const Hub = () => {
     const API_URL = import.meta.env.VITE_API_URL;
@@ -17,10 +20,23 @@ export const Hub = () => {
     const urlUser = `${API_URL}/api/usuarios/all`
     const urlEspaciosUser = `${API_URL}/api/usuarios-espacios/all?idUsuario=`
     const urlCrearEspacio = `${API_URL}/api/espacios/crear`
+
+    const navigate = useNavigate();
     const [seccionActiva, setSeccionActiva] = useState("resumen")
     const [espacioActual, setEspacioActual] = useState(null)
+    const [nuevoEspacio, setNuevoEspacio] = useState("")
+    const [modalNuevoEspacioAbierto, setModalNuevoEspacioAbierto] = useState(false)
+    const [modalConfiguracionAbierto, setModalConfiguracionAbierto] = useState(false)
+    const [modoModal, setModoModal] = useState("opciones");
+    const [usuario, setUsuario] = useState("")
+    const [espaciosDisponibles, setEspaciosDisponibles] = useState(0);
+    const [espacios, setEspacios] = useState([])
+    const [nombre, setNombre] = useState("")
+    const [correo, setCorreo] = useState("")
 
     useEffect(() => {
+        console.log("userId:", userId);
+        console.log("token :", localStorage.getItem("accessToken"))
         getUser();
         getEspacios();
     }, []);
@@ -40,27 +56,17 @@ export const Hub = () => {
             case "resumen":
                 return <Resumen espacioActual={espacioActual} nombreEspacio={espacioActual.nombreEspacio} />
             case "gastos":
-                return <Gastos espacioActual={espacioActual} nombreEspacio={espacioActual.nombreEspacio}/>
+                return <Gastos espacioActual={espacioActual} nombreEspacio={espacioActual.nombreEspacio} />
             case "reportes":
-                return <Reportes espacioActual={espacioActual} nombreEspacio={espacioActual.nombreEspacio}/>
+                return <Reportes espacioActual={espacioActual} nombreEspacio={espacioActual.nombreEspacio} />
             case "miembros":
-                return <Miembros espacioActual={espacioActual} nombreEspacio={espacioActual.nombreEspacio}/>
+                return <Miembros espacioActual={espacioActual} nombreEspacio={espacioActual.nombreEspacio} />
             case "categorias":
-                return <Categorias espacioActual={espacioActual} nombreEspacio={espacioActual.nombreEspacio}/>
+                return <Categorias espacioActual={espacioActual} nombreEspacio={espacioActual.nombreEspacio} />
             default:
-                return <Resumen espacioActual={espacioActual} nombreEspacio={espacioActual.nombreEspacio}/>
+                return <Resumen espacioActual={espacioActual} nombreEspacio={espacioActual.nombreEspacio} />
         }
     }
-
-
-    const [nuevoEspacio, setNuevoEspacio] = useState("")
-    const [modalNuevoEspacioAbierto, setModalNuevoEspacioAbierto] = useState(false)
-    const [modalConfiguracionAbierto, setModalConfiguracionAbierto] = useState(false)
-    const [usuario, setUsuario] = useState("")
-    const [espaciosDisponibles, setEspaciosDisponibles] = useState(0);
-    const [espacios, setEspacios] = useState([])
-    const [nombre, setNombre] = useState("")
-    const [correo, setCorreo] = useState("")
 
     const getUser = async () => {
         try {
@@ -69,12 +75,12 @@ export const Hub = () => {
             const usuarioEncontrado = respuesta.data.data.find((u) => u.id === parseInt(userId));
 
             setUsuario(usuarioEncontrado);
-            //setEspaciosDisponibles(usuarioEncontrado.espaciosdisponibles)
+            setEspaciosDisponibles(usuarioEncontrado.espaciosdisponibles)
             setNombre(usuarioEncontrado.nombreusuario)
             setCorreo(usuarioEncontrado.correo)
             console.log("usuario", usuarioEncontrado)
         } catch (e) {
-            console.log(e)
+            console.log("error getUser: ", e)
         }
     };
 
@@ -84,44 +90,51 @@ export const Hub = () => {
             const respuesta = await axiosInstance(url)
             const espaciosData = respuesta.data.data;
             setEspacios(espaciosData);
-            console.log(respuesta.data.data)
+            console.log("espaciosdata: ", espaciosData)
+            console.log("getespacios: ", respuesta.data.data)
             if (!espacioActual && espaciosData.length > 0) {
                 setEspacioActual(espaciosData[0]);
             }
-            console.log(espacioActual)
+            console.log("espacioActual: ", espacioActual)
         } catch (e) {
-            console.log(e)
+            console.log("errorGetEspacios: ", e)
         }
     }
 
-
     const agregarEspacio = async () => {
+        console.log("userId:", userId);
         const nombreNormalizado = nuevoEspacio.trim().toLowerCase();
         if (!nombreNormalizado) {
             toast.error("El nombre del espacio no puede estar vacío.");
             return;
         }
 
-        const espaciosUnicos = new Set(espacios.map(espacios => espacios.nombreEspacio.toLowerCase()));
+        const espaciosUnicos = new Set(
+            espacios
+                .filter((espacio) => espacio.nombreEspacio) // filtra nulos o undefined
+                .map((espacio) => espacio.nombreEspacio.toLowerCase())
+        );
+
         if (espaciosUnicos.has(nombreNormalizado)) {
             toast.error("Ya tienes un espacio con ese nombre");
             return;
         }
 
-        if (espacios.size >= 5) {
+        if (espaciosDisponibles <= 0) {
             toast.error("Solo puedes crear 5 espacios únicos.");
             return;
         }
         try {
-            console.log(urlCrearEspacio)
+            console.log("urlCrearEspacios: ", urlCrearEspacio)
             const parametros = {
-                nombre: nuevoEspacio,
+                nombre: nombreNormalizado,
                 idUsuario: parseInt(userId)
             }
-            console.log(parametros)
+            console.log("parametros: ", parametros)
+            console.log("token dentro de la peticion: ", localStorage.getItem("accessToken"))
             const response = await axiosInstance.post(urlCrearEspacio, parametros);
 
-            console.log(response)
+            console.log("response: ", response)
             if (response) {
                 toast.success("Espacio agregado correctamente.");
                 setNuevoEspacio("");
@@ -132,20 +145,33 @@ export const Hub = () => {
             }
 
         } catch (e) {
-        if (e.response?.status === 403) {
-            toast.error("Solo se permiten crear 5 espacios únicos.");
-            setNuevoEspacio("");
-            setModalNuevoEspacioAbierto(false);
-        } else {
-            toast.error("Hubo un error al crear el espacio.");
-            setNuevoEspacio("");
-            setModalNuevoEspacioAbierto(false);
-            console.error("Error desconocido:", e);
+            if (e.response?.status === 403) {
+                toast.error("Solo se permiten crear 5 espacios únicos.");
+                setNuevoEspacio("");
+                setModalNuevoEspacioAbierto(false);
+                console.log(e)
+            } else {
+                toast.error("Hubo un error al crear el espacio.");
+                setNuevoEspacio("");
+                setModalNuevoEspacioAbierto(false);
+                console.error("Error desconocido:", e);
+            }
         }
-    }
 
     };
 
+    const cerrarSesion = async () => {
+        try {
+
+            localStorage.removeItem("accessToken");
+            localStorage.removeItem("userId");
+
+            navigate("/");
+
+        } catch (error) {
+            console.log(error)
+        }
+    };
 
     return (
         <div className="app-container">
@@ -165,16 +191,17 @@ export const Hub = () => {
                 <div className="space-selector">
                     <div className="d-flex align-items-center justify-content-between mb-2">
                         <label className="mb-0">Espacio Actual</label>
-                        <button type="button" className="btn btn-success btn-sm" style={{ padding: "0.25rem 0.75rem" }}
-                            onClick={() => setModalNuevoEspacioAbierto(true)}
+                        <button type="button" className="primary-button" style={{ padding: "0.25rem 0.75rem" }}
+                            onClick={() => {
+                                setModalNuevoEspacioAbierto(true);
+                                setModoModal("opciones");
+                            }}
                         >
                             Agregar
                         </button>
 
                     </div>
-                    <select
-                        className="space-select d-flex pe-3"
-                        value={espacioActual?.nombreEspacio || ""}
+                    <select className="space-select d-flex pe-3" value={espacioActual?.nombreEspacio || ""}
                         onChange={(e) => {
                             const seleccionado = espacios.find(esp => esp.nombreEspacio === e.target.value);
                             if (seleccionado) setEspacioActual(seleccionado);
@@ -184,7 +211,7 @@ export const Hub = () => {
                             <option disabled>No tienes espacios. ¡Únete o crea alguno!</option>
                         ) : (
                             espacios.map((espacio, index) => (
-                                <option key={index} value={espacio.nombreEspacio}>
+                                <option className="capitalize" key={index} value={espacio.nombreEspacio}>
                                     {espacio.nombreEspacio} {espacio.rol === "Administrador" ? "(Admin)" : ""}
                                 </option>
                             ))
@@ -225,7 +252,7 @@ export const Hub = () => {
                     </div>
                     <div className="top-bar-actions">
                         <button className="icon-button">🔔</button>
-                        <button className="icon-button" onClick={''} >
+                        <button className="icon-button" onClick={() => setModalConfiguracionAbierto(true)} >
                             👤
                         </button>
                     </div>
@@ -234,37 +261,16 @@ export const Hub = () => {
                 <main className="content-area">{renderContent()}</main>
             </div>
 
-            {modalNuevoEspacioAbierto && (
-                <>
-                    <div className="modal fade show d-block" tabIndex="-1" role="dialog" style={{ backgroundColor: "rgba(0,0,0,0.5)" }}>
-                        <div className="modal-dialog modal-dialog-centered" role="document" style={{ maxWidth: "400px" }}>
-                            <div className="modal-content">
-                                <div className="modal-header d-flex justify-content-between">
-                                    <h5 className="modal-title">Agregar nuevo espacio</h5>
-                                    <button type="button" className="close" aria-label="Close" onClick={() => setModalNuevoEspacioAbierto(false)}
-                                        style={{ backgroundColor: "transparent", border: "none", fontSize: "1.25rem", color: "black", cursor: "pointer" }}>
-                                        <span aria-hidden="true">&times;</span>
-                                    </button>
-                                </div>
-                                <div className="modal-body">
-                                    <input type="text" className="form-control" placeholder="Nombre del nuevo espacio" value={nuevoEspacio}
-                                        onChange={(e) => setNuevoEspacio(e.target.value)}
-                                    />
-                                </div>
-                                <div className="modal-footer">
-                                    <button type="button" className="btn btn-secondary" onClick={() => setModalNuevoEspacioAbierto(false)}>
-                                        Cancelar
-                                    </button>
-                                    <button type="button" className="btn btn-success" onClick={agregarEspacio}>
-                                        Agregar
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div className="modal-backdrop fade show"></div>
-                </>
-            )}
+            <ModalEspacios
+                modalNuevoEspacioAbierto={modalNuevoEspacioAbierto}
+                setModalNuevoEspacioAbierto={setModalNuevoEspacioAbierto}
+                modoModal={modoModal}
+                setModoModal={setModoModal}
+                nuevoEspacio={nuevoEspacio}
+                setNuevoEspacio={setNuevoEspacio}
+                agregarEspacio={agregarEspacio}
+            />
+
 
             {modalConfiguracionAbierto && (
                 <>
@@ -296,9 +302,7 @@ export const Hub = () => {
                                     <button type="button" className="btn btn-secondary" onClick={() => setModalConfiguracionAbierto(false)}>
                                         Cerrar
                                     </button>
-                                    <button type="button" className="btn btn-danger" onClick={() => {
-
-                                    }}
+                                    <button type="button" className="btn btn-danger" onClick={cerrarSesion}
                                     >
                                         Cerrar sesión
                                     </button>
