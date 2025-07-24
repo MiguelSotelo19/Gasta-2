@@ -67,7 +67,7 @@ export const Hub = () => {
             case "reportes":
                 return <Reportes espacioActual={espacioActual} nombreEspacio={espacioActual.nombreEspacio} />
             case "miembros":
-                return <Miembros espacioActual={espacioActual} nombreEspacio={espacioActual.nombreEspacio} />
+                return <Miembros espacioActual={espacioActual} nombreEspacio={espacioActual.nombreEspacio} onSalirDelEspacio={onSalirDelEspacio} />
             case "categorias":
                 return <Categorias espacioActual={espacioActual} nombreEspacio={espacioActual.nombreEspacio} />
             default:
@@ -99,10 +99,12 @@ export const Hub = () => {
 
             setEspacios(espaciosData);
             console.log("espaciosdata: ", espaciosData)
-            if (!espacioActual != null && espaciosData.length > 0) {
+            if (espaciosData.length === 0) {
+                setEspacioActual(null);
+                return;
+            }
+            if (!espacioActual || !espaciosData.some(e => e.id === espacioActual.id)) {
                 setEspacioActual(espaciosData[0]);
-            } else {
-                setEspacioActual(null)
             }
             console.log("espacioActual: ", espacioActual)
         } catch (e) {
@@ -119,6 +121,15 @@ export const Hub = () => {
             console.log("errorGetEspacios: ", e)
         }
     }
+
+    const onSalirDelEspacio = async () => {
+        toast.success(`Has salido del espacio.`);
+
+        await new Promise((resolve) => setTimeout(resolve, 2000));
+
+        await getEspacios();
+        setSeccionActiva("resumen");
+    };
 
     const agregarEspacio = async () => {
         console.log("userId:", userId);
