@@ -7,7 +7,7 @@ const axiosInstance = axios.create({
   timeout: 15000,
   headers: {
     "Content-Type": "application/json",
-    accept: "application/json",
+    Accept: "application/json",
   },
 })
 
@@ -31,8 +31,8 @@ axiosInstance.interceptors.response.use(
   (error) => {
     if (error.response?.status === 401) {
       localStorage.removeItem("accessToken")
-      localStorage.removeItem("correo")
-      sessionStorage.removeItem("usuario")
+      //localStorage.removeItem("correo")
+      //sessionStorage.removeItem("usuario")
       window.location.href = "/"
     }
     return Promise.reject(error)

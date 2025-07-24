@@ -1,18 +1,15 @@
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
-import { Button } from "../components/ui/button"
-import { Input } from "../components/ui/input"
-import { Label } from "../components/ui/label"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card"
-import { Alert, AlertDescription } from "../components/ui/alert"
-import { Link } from "react-router-dom"
+import { Button } from "../../components/ui/button"
+import { Input } from "../../components/ui/input"
+import { Label } from "../../components/ui/label"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../components/ui/card"
+import { Alert, AlertDescription } from "../../components/ui/alert"
 import { Mail, Lock, DollarSign, Users, PieChart } from "lucide-react"
 import { toast, ToastContainer } from "react-toastify"
-import { auth } from "../services/authService"
+import { auth } from "../../services/authService"
 
 export default function IniciarSesion() {
-  const API_URL = import.meta.env.VITE_API_URL;
-  const urlSignIn = `${API_URL}/api/auth/signin`
   const navigate = useNavigate();
 
 
@@ -53,7 +50,11 @@ export default function IniciarSesion() {
         const respuesta = await auth(formData.email, formData.password);
 
         if (respuesta && respuesta.data){
-          toast.done("Inicio de sesión exitoso")
+          toast.success("Inicio de sesión exitoso")
+          
+          setTimeout(() => {
+            navigate("/Hub")
+          }, 1000) 
         }
 
       } catch(e) {
@@ -195,28 +196,41 @@ export default function IniciarSesion() {
               </form>
 
               <div className="flex justify-between items-center text-sm">
-                <Link href="/forgot-password" className="text-blue-500 hover:text-blue-600 hover:underline">
+                <a href="/forgot-password" className="text-blue-500 hover:text-blue-600 hover:underline">
                   ¿Olvidaste tu contraseña?
-                </Link>
-                <Link href="/register" className="text-blue-500 hover:text-blue-600 hover:underline">
+                </a>
+                <a href="/register" className="text-blue-500 hover:text-blue-600 hover:underline">
                   Crear cuenta
-                </Link>
+                </a>
               </div>
 
               <div className="text-center text-xs text-gray-500 pt-4 border-t">
                 Al iniciar sesión, aceptas nuestros{" "}
-                <Link href="/terms" className="text-blue-500 hover:underline">
+                <a href="/terms" className="text-blue-500 hover:underline">
                   Términos de Servicio
-                </Link>{" "}
+                </a>{" "}
                 y{" "}
-                <Link href="/privacy" className="text-blue-500 hover:underline">
+                <a href="/privacy" className="text-blue-500 hover:underline">
                   Política de Privacidad
-                </Link>
+                </a>
               </div>
             </CardContent>
           </Card>
         </div>
       </div>
+      
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="colored"
+      />
     </div>
   )
 }
