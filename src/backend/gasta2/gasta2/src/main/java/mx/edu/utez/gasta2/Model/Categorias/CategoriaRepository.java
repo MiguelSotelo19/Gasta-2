@@ -13,4 +13,5 @@ public interface CategoriaRepository extends JpaRepository<CategoriaBean, Long> 
 
     List<CategoriaBean>findAllByEspacio_Id(Long id);
 
+    void deleteByEspacioId(Long id);
 }
