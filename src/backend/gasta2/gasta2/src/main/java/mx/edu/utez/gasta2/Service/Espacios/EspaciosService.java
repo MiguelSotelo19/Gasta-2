@@ -1,6 +1,7 @@
 package mx.edu.utez.gasta2.Service.Espacios;
 
 import mx.edu.utez.gasta2.Config.ApiResponse;
+import mx.edu.utez.gasta2.Model.Categorias.CategoriaBean;
 import mx.edu.utez.gasta2.Model.Espacios.EspacioBean;
 import mx.edu.utez.gasta2.Model.Espacios.EspaciosRepository;
 import mx.edu.utez.gasta2.Model.Roles.RolBean;
@@ -8,6 +9,7 @@ import mx.edu.utez.gasta2.Model.Roles.RolRepository;
 import mx.edu.utez.gasta2.Model.Usuarios.UsuarioBean;
 import mx.edu.utez.gasta2.Model.Usuarios.UsuariosRepository;
 import mx.edu.utez.gasta2.Model.Usuarios_Espacios.UsuariosEspaciosBean;
+import mx.edu.utez.gasta2.Service.Categorias.CategoriaService;
 import mx.edu.utez.gasta2.Service.Usuarios.UsuarioService;
 import mx.edu.utez.gasta2.Service.Usuarios_Espacios.Usuarios_Espacio_Service;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +19,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -34,6 +38,9 @@ public class EspaciosService {
 
     @Autowired
     private Usuarios_Espacio_Service usuariosEspaciosService;
+
+    @Autowired
+    private CategoriaService categoriaService;
 
     @Transactional(readOnly = true)
     public ResponseEntity<ApiResponse> getAll(){
@@ -56,8 +63,16 @@ public class EspaciosService {
         espacioBean.setCodigoinvitacion(codigo);
         espacioBean.setStatus(true);
 
-        EspacioBean espacioGuardado = repository.saveAndFlush(espacioBean);
 
+        EspacioBean espacioGuardado = repository.saveAndFlush(espacioBean);
+        System.out.println("espacio: " + espacioGuardado.getId());
+
+        //inyectar las categorias por default
+        List<CategoriaBean> categoriaBeans = new ArrayList<>();
+        categoriaBeans.add(new CategoriaBean("Comida", espacioGuardado));
+        categoriaBeans.add(new CategoriaBean("Energetico", espacioGuardado));
+        categoriaBeans.add(new CategoriaBean("Personal", espacioGuardado));
+        categoriaService.defaultCategory(categoriaBeans);
         Optional<UsuarioBean> optionalUsuarioBean = usuariosRepository.findById(idUsuario);
         if (optionalUsuarioBean.isEmpty()) {
             return new ResponseEntity<>(new ApiResponse(HttpStatus.BAD_REQUEST, true, "El usuario no se encuentra registrado"), HttpStatus.BAD_REQUEST);
