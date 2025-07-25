@@ -56,7 +56,7 @@ public class CategoriaService {
         }
 
         CategoriaBean actual = optional.get();
-
+//Validacion de la misma categoria dentro del back :)
         //   Si hay nombre duplicado dentro del mismo espacio
         Optional<CategoriaBean> exists = repository.findByNombreAndEspacio_Id(nuevaCategoria.getNombre(), nuevaCategoria.getEspacio().getId());
         if (exists.isPresent() && !exists.get().getId().equals(id)) {
