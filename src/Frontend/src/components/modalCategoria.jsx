@@ -1,19 +1,28 @@
-import { useState } from "react"
-import { X, Plus, ArrowLeft, Sparkles } from "lucide-react"
+import { useState, useEffect } from "react"
+import { X, Plus, Sparkles } from "lucide-react"
 import "./css/modal-espacios.css"
 
-export default function ModalNuevaCategoria({ abierto, setAbierto, agregarCategoria }) {
+export default function ModalNuevaCategoria({ abierto, setAbierto, agregarCategoria, categoriaEditar }) {
   const [nombreCategoria, setNombreCategoria] = useState("")
   const [isLoading, setIsLoading] = useState(false)
 
-  const handleCrear = async () => {
+  // Precarga el nombre si estamos en modo edición
+  useEffect(() => {
+    if (categoriaEditar && abierto) {
+      setNombreCategoria(categoriaEditar.nombre || "")
+    } else if (abierto) {
+      setNombreCategoria("")
+    }
+  }, [categoriaEditar, abierto])
+
+  const handleGuardar = async () => {
     setIsLoading(true)
     try {
       await agregarCategoria(nombreCategoria)
       setNombreCategoria("")
       setAbierto(false)
     } catch (error) {
-      console.error("Error al crear categoría:", error)
+      console.error("Error al guardar categoría:", error)
     } finally {
       setIsLoading(false)
     }
@@ -28,8 +37,14 @@ export default function ModalNuevaCategoria({ abierto, setAbierto, agregarCatego
           <div className="modal-espacios-icon-container">
             <Sparkles className="modal-espacios-icon" />
           </div>
-          <h2 className="modal-espacios-title">Crear nueva categoría</h2>
-          <p className="modal-espacios-description">Agrega una categoría de gasto a este espacio</p>
+          <h2 className="modal-espacios-title">
+            {categoriaEditar ? "Editar categoría" : "Crear nueva categoría"}
+          </h2>
+          <p className="modal-espacios-description">
+            {categoriaEditar
+              ? "Modifica el nombre de la categoría"
+              : "Agrega una categoría de gasto a este espacio"}
+          </p>
         </div>
 
         <div className="modal-espacios-content">
@@ -65,18 +80,27 @@ export default function ModalNuevaCategoria({ abierto, setAbierto, agregarCatego
 
           <button
             className="modal-espacios-btn modal-espacios-btn-primary modal-espacios-btn-green"
-            onClick={handleCrear}
+            onClick={handleGuardar}
             disabled={!nombreCategoria.trim() || isLoading}
           >
             {isLoading ? (
               <>
                 <div className="modal-espacios-spinner" />
-                Creando...
+                {categoriaEditar ? "Guardando..." : "Creando..."}
               </>
             ) : (
               <>
-                <Plus className="modal-espacios-btn-icon" />
-                Crear categoría
+                {categoriaEditar ? (
+                  <>
+                    <Plus className="modal-espacios-btn-icon" />
+                    Guardar cambios
+                  </>
+                ) : (
+                  <>
+                    <Plus className="modal-espacios-btn-icon" />
+                    Crear categoría
+                  </>
+                )}
               </>
             )}
           </button>
