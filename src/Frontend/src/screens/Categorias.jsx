@@ -15,12 +15,11 @@ export const Categorias = ({ espacioActual, nombreEspacio }) => {
   const [categorias, setCategorias] = useState([]);
   const [modalAbierto, setModalAbierto] = useState(false);
   const [categoriaEditar, setCategoriaEditar] = useState(null);
+  const [filtro, setFiltro] = useState("");
 
-  // Carga categorías
   const fetchCategorias = async (idEspacio, showToast = true) => {
     try {
       const response = await getCategoriesByEspacio(idEspacio);
-    
       setCategorias(Array.isArray(response.data) ? response.data : []);
       if (showToast) toast.success("Categorías cargadas correctamente");
     } catch (error) {
@@ -31,21 +30,17 @@ export const Categorias = ({ espacioActual, nombreEspacio }) => {
 
   useEffect(() => {
     if (espacioActual?.idEspacio) {
-      // Resetea estados al cambiar de espacio
       setCategorias([]);
       setCategoriaEditar(null);
       setModalAbierto(false);
-
       fetchCategorias(espacioActual.idEspacio, true);
     } else {
-      // Si no hay espacio, limpiar todo
       setCategorias([]);
       setCategoriaEditar(null);
       setModalAbierto(false);
     }
   }, [espacioActual]);
 
-  // Agregar o actualizar categoría
   const guardarCategoria = async (nombreCategoria) => {
     if (!espacioActual || !espacioActual.idEspacio) {
       toast.error("No hay un espacio seleccionado válido");
@@ -59,7 +54,6 @@ export const Categorias = ({ espacioActual, nombreEspacio }) => {
 
     const nombreFormateado = nombreCategoria.trim().toLowerCase();
 
-    // Validar duplicados excluyendo la categoría que se está editando
     const yaExiste = categorias.some(
       (cat) =>
         cat.nombre &&
@@ -71,7 +65,6 @@ export const Categorias = ({ espacioActual, nombreEspacio }) => {
       return;
     }
 
-    // Validar que la categoría que se está editando pertenezca al espacio actual
     if (
       categoriaEditar &&
       (!categoriaEditar.id || !categorias.some((cat) => cat.id === categoriaEditar.id))
@@ -108,7 +101,6 @@ export const Categorias = ({ espacioActual, nombreEspacio }) => {
     }
   };
 
-  // Abrir modal para editar categoría
   const handleEditarCategoria = (categoria) => {
     if (categoria && categorias.some((cat) => cat.id === categoria.id)) {
       setCategoriaEditar(categoria);
@@ -118,7 +110,6 @@ export const Categorias = ({ espacioActual, nombreEspacio }) => {
     }
   };
 
-  // Eliminar con confirmación
   const handleEliminarCategoria = (categoria) => {
     Swal.fire({
       title: `¿Está seguro de eliminar la categoría "${categoria.nombre}"?`,
@@ -151,12 +142,43 @@ export const Categorias = ({ espacioActual, nombreEspacio }) => {
           <button
             className="primary-button"
             onClick={() => {
-              setCategoriaEditar(null); // Limpiar edición
+              setCategoriaEditar(null);
               setModalAbierto(true);
             }}
           >
             <span>+</span> Nueva Categoría
           </button>
+        </div>
+
+        {/* Input modificado */}
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "0.5rem",
+            marginTop: "1rem",
+            backgroundColor: "#f0f0f0",
+            padding: "0.4rem 0.8rem",
+            borderRadius: "8px",
+            maxWidth: "400px",
+          }}
+        >
+          <span role="img" aria-label="lupa" style={{ fontSize: "1.2rem" }}>
+            🔍
+          </span>
+          <input
+            type="text"
+            placeholder="Buscar categoría..."
+            value={filtro}
+            onChange={(e) => setFiltro(e.target.value)}
+            style={{
+              border: "none",
+              outline: "none",
+              backgroundColor: "transparent",
+              flex: 1,
+              fontSize: "1rem",
+            }}
+          />
         </div>
 
         <div className="card-content categorias-grid">
@@ -166,7 +188,12 @@ export const Categorias = ({ espacioActual, nombreEspacio }) => {
             </div>
           ) : (
             categorias
-              .filter((cat) => cat.id !== undefined && cat.id !== null)
+              .filter(
+                (cat) =>
+                  cat.id !== undefined &&
+                  cat.id !== null &&
+                  cat.nombre?.toLowerCase().includes(filtro.toLowerCase())
+              )
               .map((categoria) => (
                 <div className="member-item" key={categoria.id}>
                   <div className="member-avatar">
@@ -200,7 +227,6 @@ export const Categorias = ({ espacioActual, nombreEspacio }) => {
         </div>
       </div>
 
-      {/* Modal para crear o editar */}
       <ModalNuevaCategoria
         abierto={modalAbierto}
         setAbierto={setModalAbierto}
