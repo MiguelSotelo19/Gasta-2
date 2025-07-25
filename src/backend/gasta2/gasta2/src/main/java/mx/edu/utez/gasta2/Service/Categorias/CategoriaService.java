@@ -47,6 +47,12 @@ public class CategoriaService {
         return new ResponseEntity<>(new ApiResponse(HttpStatus.CREATED, false, "La categoría ha sido registrada en el espacio"), HttpStatus.CREATED);
     }
 
+    public void defaultCategory(List<CategoriaBean> categoriaBeans){
+        for (CategoriaBean cat : categoriaBeans) {
+            repository.save(cat);
+        }
+    }
+
     @Transactional(rollbackFor = {Exception.class})
     public ResponseEntity<ApiResponse> updateCategory(Long id, CategoriaBean nuevaCategoria) {
         Optional<CategoriaBean> optional = repository.findById(id);
