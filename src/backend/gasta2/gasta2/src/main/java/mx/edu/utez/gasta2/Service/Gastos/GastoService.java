@@ -49,6 +49,12 @@ public class GastoService {
             return new ResponseEntity<>(new ApiResponse(HttpStatus.NOT_FOUND, true,"Usuario, categoria o espacio no encontrados"),HttpStatus.NOT_FOUND);
         }
 
+        //Validar si la categoria pertenece al espacio
+        boolean categoriaValida = categoriaRepository.existsByIdAndEspacio_Id(dto.getIdCategoria(), dto.getIdEspacio());
+        if (!categoriaValida) {
+            return new ResponseEntity<>(new ApiResponse(HttpStatus.BAD_REQUEST, true, "La categoría no pertenece al espacio."), HttpStatus.BAD_REQUEST);
+        }
+
         //Verificar si el usuario pertenec al espacio
         boolean pertenece = userEspaciosRepository.existsByUsuario_IdAndEspacio_Id(dto.getIdUsuario(), dto.getIdEspacio());
         if (!pertenece){
