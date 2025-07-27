@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.Optional;
 
 @Service
 public class GastoService {
@@ -73,5 +74,42 @@ public class GastoService {
 
         return new ResponseEntity<>(new ApiResponse(HttpStatus.CREATED, true, "Gasto registrado correctamente"),HttpStatus.CREATED);
     }
+
+    @Transactional(rollbackFor = Exception.class)
+    public ResponseEntity<ApiResponse> editarGasto(Long idGasto, GastoDTO dto){
+        Optional<GastoBean> optional = gastoRepository.findById(idGasto);
+
+        if (optional.isEmpty()){
+            return new ResponseEntity<>(new ApiResponse(HttpStatus.NOT_FOUND,true,"Gasto no encontrado"),HttpStatus.NOT_FOUND);
+        }
+
+        if (dto.getCantidad() <= 0){
+            return new ResponseEntity<>(new ApiResponse(HttpStatus.BAD_REQUEST, true, "La cantidad debe ser mayor a cero"), HttpStatus.BAD_REQUEST);
+        }
+
+        //Validar si la categoria pertenece al espacio
+        boolean categoriaValida = categoriaRepository.existsByIdAndEspacio_Id(dto.getIdCategoria(), dto.getIdEspacio());
+        if (!categoriaValida) {
+            return new ResponseEntity<>(new ApiResponse(HttpStatus.BAD_REQUEST, true, "La categoría no pertenece al espacio."), HttpStatus.BAD_REQUEST);
+        }
+
+        var gasto = optional.get();
+
+        var categoriaOpt = categoriaRepository.findById(dto.getIdCategoria());
+
+        if (categoriaOpt.isEmpty()){
+            return new ResponseEntity<>(new ApiResponse(HttpStatus.NOT_FOUND,true,"Categoría no encontrada"), HttpStatus.NOT_FOUND);
+        }
+
+        gasto.setCantidad(dto.getCantidad());
+        gasto.setDescripcion(dto.getDescripcion());
+        gasto.setFecha(dto.getFecha() != null ? dto.getFecha() : LocalDate.now());
+        gasto.setTipogasto(categoriaOpt.get());
+
+        gastoRepository.save(gasto);
+
+        return new ResponseEntity<>(new ApiResponse(HttpStatus.OK,false,"Gasto Actualizado Correctamente"),HttpStatus.OK);
+    }
+
 
 }
