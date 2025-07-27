@@ -87,6 +87,14 @@ public class GastoService {
             return new ResponseEntity<>(new ApiResponse(HttpStatus.BAD_REQUEST, true, "La cantidad debe ser mayor a cero"), HttpStatus.BAD_REQUEST);
         }
 
+        //Tomando el usuario, espacio y rol del usuario dentro del espacio
+        boolean esAdmin = userEspaciosRepository.existsByUsuario_IdAndEspacio_IdAndRol_Id(dto.getIdUsuario(), dto.getIdEspacio(),1L);
+
+        //Validamos que esl usuario tenga rol de administrador dentro del espacio
+        if (!esAdmin){
+            return new ResponseEntity<>(new ApiResponse(HttpStatus.FORBIDDEN,true,"Solo los administradores pueden editar gastos"),HttpStatus.FORBIDDEN);
+        }
+
         //Validar si la categoria pertenece al espacio
         boolean categoriaValida = categoriaRepository.existsByIdAndEspacio_Id(dto.getIdCategoria(), dto.getIdEspacio());
         if (!categoriaValida) {
