@@ -76,37 +76,40 @@ public class GastoService {
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public ResponseEntity<ApiResponse> editarGasto(Long idGasto, GastoDTO dto){
+    public ResponseEntity<ApiResponse> editarGasto(Long idGasto, GastoDTO dto) {
         Optional<GastoBean> optional = gastoRepository.findById(idGasto);
 
-        if (optional.isEmpty()){
-            return new ResponseEntity<>(new ApiResponse(HttpStatus.NOT_FOUND,true,"Gasto no encontrado"),HttpStatus.NOT_FOUND);
+        if (optional.isEmpty()) {
+            return new ResponseEntity<>(new ApiResponse(HttpStatus.NOT_FOUND, true, "Gasto no encontrado"), HttpStatus.NOT_FOUND);
         }
 
-        if (dto.getCantidad() <= 0){
+        if (dto.getCantidad() <= 0) {
             return new ResponseEntity<>(new ApiResponse(HttpStatus.BAD_REQUEST, true, "La cantidad debe ser mayor a cero"), HttpStatus.BAD_REQUEST);
-        }
-
-        //Tomando el usuario, espacio y rol del usuario dentro del espacio
-        boolean esAdmin = userEspaciosRepository.existsByUsuario_IdAndEspacio_IdAndRol_Id(dto.getIdUsuario(), dto.getIdEspacio(),1L);
-
-        //Validamos que esl usuario tenga rol de administrador dentro del espacio
-        if (!esAdmin){
-            return new ResponseEntity<>(new ApiResponse(HttpStatus.FORBIDDEN,true,"Solo los administradores pueden editar gastos"),HttpStatus.FORBIDDEN);
-        }
-
-        //Validar si la categoria pertenece al espacio
-        boolean categoriaValida = categoriaRepository.existsByIdAndEspacio_Id(dto.getIdCategoria(), dto.getIdEspacio());
-        if (!categoriaValida) {
-            return new ResponseEntity<>(new ApiResponse(HttpStatus.BAD_REQUEST, true, "La categoría no pertenece al espacio."), HttpStatus.BAD_REQUEST);
         }
 
         var gasto = optional.get();
 
-        var categoriaOpt = categoriaRepository.findById(dto.getIdCategoria());
+        // Verificar que el gasto pertenezca al espacio indicado
+        Long espacioDelGasto = gasto.getTipogasto().getEspacio().getId();  // espacio real del gasto (a través de la categoría actual)
 
-        if (categoriaOpt.isEmpty()){
-            return new ResponseEntity<>(new ApiResponse(HttpStatus.NOT_FOUND,true,"Categoría no encontrada"), HttpStatus.NOT_FOUND);
+        // Valida que el usuario sea admin en ese espacio
+        boolean esAdmin = userEspaciosRepository.existsByUsuario_IdAndEspacio_IdAndRol_Rol(dto.getIdUsuario(), espacioDelGasto, "Administrador");
+
+        if (!esAdmin) {
+            return new ResponseEntity<>(new ApiResponse(HttpStatus.FORBIDDEN, true, "Solo los administradores del espacio pueden editar este gasto"), HttpStatus.FORBIDDEN);
+        }
+
+        // Valida que la nueva categoría pertenezca al mismo espacio
+        boolean categoriaValida = categoriaRepository.existsByIdAndEspacio_Id(dto.getIdCategoria(), espacioDelGasto);
+
+        if (!categoriaValida) {
+            return new ResponseEntity<>(new ApiResponse(HttpStatus.BAD_REQUEST, true, "La categoría no pertenece al mismo espacio del gasto"), HttpStatus.BAD_REQUEST);
+        }
+
+        // Actualizar los datos del gasto
+        var categoriaOpt = categoriaRepository.findById(dto.getIdCategoria());
+        if (categoriaOpt.isEmpty()) {
+            return new ResponseEntity<>(new ApiResponse(HttpStatus.NOT_FOUND, true, "Categoría no encontrada"), HttpStatus.NOT_FOUND);
         }
 
         gasto.setCantidad(dto.getCantidad());
@@ -116,7 +119,7 @@ public class GastoService {
 
         gastoRepository.save(gasto);
 
-        return new ResponseEntity<>(new ApiResponse(HttpStatus.OK,false,"Gasto Actualizado Correctamente"),HttpStatus.OK);
+        return new ResponseEntity<>(new ApiResponse(HttpStatus.OK, false, "Gasto actualizado correctamente"), HttpStatus.OK);
     }
 
 

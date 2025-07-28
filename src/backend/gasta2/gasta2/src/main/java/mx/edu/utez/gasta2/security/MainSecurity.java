@@ -86,6 +86,8 @@ public class MainSecurity {
                                 .requestMatchers("/api/usuarios/eliminar-cuenta/**").hasAnyRole("Administrador")
                                 .requestMatchers("/api/usuarios/all").hasAnyRole("Administrador", "Invitado")
                                 .requestMatchers("/api/usuarios-espacios/**").hasAnyRole("Administrador", "Invitado")
+                                .requestMatchers("/api/gastos/registrar").hasAnyRole("Administrador","Invitado")
+                                .requestMatchers("/api/gastos/editar/**").hasAnyRole("Administrador")
                                 .anyRequest().authenticated()
                 )
                 .httpBasic(Customizer.withDefaults())

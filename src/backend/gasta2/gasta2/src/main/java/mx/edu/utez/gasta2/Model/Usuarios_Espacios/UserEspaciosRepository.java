@@ -31,6 +31,6 @@ public interface UserEspaciosRepository extends JpaRepository<UsuariosEspaciosBe
 
     boolean existsByUsuario_IdAndEspacio_Id(Long usuarioId, Long espacioId);
 
-    boolean existsByUsuario_IdAndEspacio_IdAndRol_Id(Long idUsuario, Long idEspacio, Long idRol);
+    boolean existsByUsuario_IdAndEspacio_IdAndRol_Rol(Long idUsuario, Long idEspacio, String Rol);
 
 }
