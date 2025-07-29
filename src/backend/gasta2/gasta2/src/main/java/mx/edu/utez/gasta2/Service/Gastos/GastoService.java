@@ -92,6 +92,11 @@ public class GastoService {
         // Verificar que el gasto pertenezca al espacio indicado
         Long espacioDelGasto = gasto.getTipogasto().getEspacio().getId();  // espacio real del gasto (a través de la categoría actual)
 
+        // Validación adicional
+        if (!espacioDelGasto.equals(dto.getIdEspacio())) {
+            return new ResponseEntity<>(new ApiResponse(HttpStatus.BAD_REQUEST, true, "El gasto no pertenece al espacio especificado"), HttpStatus.BAD_REQUEST);
+        }
+
         // Valida que el usuario sea admin en ese espacio
         boolean esAdmin = userEspaciosRepository.existsByUsuario_IdAndEspacio_IdAndRol_Rol(dto.getIdUsuario(), espacioDelGasto, "Administrador");
 
