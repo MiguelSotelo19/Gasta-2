@@ -328,6 +328,12 @@ public class Usuarios_Espacio_Service {
                 .mapToDouble(PorcentajeAsignacionDTO::getPorcentaje)
                 .sum();
 
+        // Validar que sumen exactamente 100
+        if (Math.round(sumaTotal * 100.0) / 100.0 != 100.0) {
+            return new ResponseEntity<>(new ApiResponse(HttpStatus.BAD_REQUEST, true, "La suma total debe ser 100%"), HttpStatus.BAD_REQUEST);
+        }
+
+
         // Actualizar cada relación
         for (PorcentajeAsignacionDTO dto : request.getAsignaciones()) {
             Optional<UsuarioBean> usuarioOpt = usuariosRepository.findById(dto.getIdUsuario());
