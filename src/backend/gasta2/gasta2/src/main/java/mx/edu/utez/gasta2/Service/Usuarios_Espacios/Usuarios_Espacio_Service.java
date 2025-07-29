@@ -8,6 +8,8 @@ import mx.edu.utez.gasta2.Model.Roles.RolBean;
 import mx.edu.utez.gasta2.Model.Roles.RolRepository;
 import mx.edu.utez.gasta2.Model.Usuarios.UsuarioBean;
 import mx.edu.utez.gasta2.Model.Usuarios.UsuariosRepository;
+import mx.edu.utez.gasta2.Model.Usuarios_Espacios.DTO.PorcentajeAsignacionDTO;
+import mx.edu.utez.gasta2.Model.Usuarios_Espacios.DTO.PorcentajesRequestDTO;
 import mx.edu.utez.gasta2.Model.Usuarios_Espacios.DTO.UsuariosEspaciosDTO;
 import mx.edu.utez.gasta2.Model.Usuarios_Espacios.UserEspaciosRepository;
 import mx.edu.utez.gasta2.Model.Usuarios_Espacios.UsuariosEspaciosBean;
@@ -21,6 +23,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -294,6 +297,59 @@ public class Usuarios_Espacio_Service {
         return new ResponseEntity<>(new ApiResponse(HttpStatus.OK, false, "Porcentaje asignado correctamente"), HttpStatus.OK);
     }
 
+    @Transactional(rollbackFor = SQLException.class)
+    public ResponseEntity<ApiResponse> asignarPorcentajesManuales(PorcentajesRequestDTO request) {
+        Optional<EspacioBean> espacioOpt = espaciosRepository.findById(request.getIdEspacio());
+        if (espacioOpt.isEmpty()) {
+            return new ResponseEntity<>(new ApiResponse(HttpStatus.NOT_FOUND, true, "Espacio no encontrado"), HttpStatus.NOT_FOUND);
+        }
+
+        EspacioBean espacio = espacioOpt.get();
+
+        // Obtener todos los usuarios que pertenecen al espacio
+        List<UsuariosEspaciosBean> participantes = repository.findAllByEspacio(espacio);
+
+        // Validar que se asignaron porcentajes a todos los usuarios del espacio
+        Set<Long> idsEnRequest = request.getAsignaciones().stream()
+                .map(PorcentajeAsignacionDTO::getIdUsuario)
+                .collect(Collectors.toSet());
+
+        List<Long> idsFaltantes = participantes.stream()
+                .map(ueb -> ueb.getUsuario().getId())
+                .filter(id -> !idsEnRequest.contains(id))
+                .collect(Collectors.toList());
+
+        if (!idsFaltantes.isEmpty()) {
+            return new ResponseEntity<>(new ApiResponse(HttpStatus.BAD_REQUEST, true,
+                    "Faltan usuarios del espacio en la asignación: " + idsFaltantes), HttpStatus.BAD_REQUEST);
+        }
+
+        double sumaTotal = request.getAsignaciones().stream()
+                .mapToDouble(PorcentajeAsignacionDTO::getPorcentaje)
+                .sum();
+
+        // Actualizar cada relación
+        for (PorcentajeAsignacionDTO dto : request.getAsignaciones()) {
+            Optional<UsuarioBean> usuarioOpt = usuariosRepository.findById(dto.getIdUsuario());
+            if (usuarioOpt.isEmpty()) {
+                return new ResponseEntity<>(new ApiResponse(HttpStatus.NOT_FOUND, true, "Usuario con ID " + dto.getIdUsuario() + " no encontrado"), HttpStatus.NOT_FOUND);
+            }
+
+            Optional<UsuariosEspaciosBean> relacionOpt = repository.findByUsuarioAndEspacio(usuarioOpt.get(), espacio);
+            if (relacionOpt.isEmpty()) {
+                return new ResponseEntity<>(new ApiResponse(HttpStatus.NOT_FOUND, true, "Relación no encontrada para el usuario ID " + dto.getIdUsuario()), HttpStatus.NOT_FOUND);
+            }
+
+            UsuariosEspaciosBean relacion = relacionOpt.get();
+            relacion.setPorcentajeGasto(Math.round(dto.getPorcentaje() * 100.0) / 100.0);
+            repository.save(relacion);
+        }
+
+        espacio.setStatus(true); // Reactivar espacio
+        espaciosRepository.save(espacio);
+
+        return new ResponseEntity<>(new ApiResponse(HttpStatus.OK, false, "Porcentajes asignados correctamente"), HttpStatus.OK);
+    }
 
 
 
