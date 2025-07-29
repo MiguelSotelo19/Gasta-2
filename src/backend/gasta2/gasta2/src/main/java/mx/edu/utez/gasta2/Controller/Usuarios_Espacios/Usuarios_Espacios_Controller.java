@@ -5,6 +5,7 @@ import mx.edu.utez.gasta2.Model.Espacios.DTO.EspacioIncompletoDTO;
 import mx.edu.utez.gasta2.Model.Espacios.EspacioBean;
 import mx.edu.utez.gasta2.Model.Usuarios_Espacios.DTO.AsignarPorcentajeDTO;
 import mx.edu.utez.gasta2.Model.Usuarios_Espacios.DTO.ChangeRolDTO;
+import mx.edu.utez.gasta2.Model.Usuarios_Espacios.DTO.PorcentajesRequestDTO;
 import mx.edu.utez.gasta2.Model.Usuarios_Espacios.DTO.UnirseEspacioDTO;
 import mx.edu.utez.gasta2.Service.Usuarios_Espacios.Usuarios_Espacio_Service;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -91,5 +92,10 @@ public class Usuarios_Espacios_Controller {
         return service.asignarPorcentajeManual(idEspacio, idUsuario, dto.getPorcentaje());
     }
 
+    // Asiganar porcentajes
+    @PutMapping("/asignar-porcentajes")
+    public ResponseEntity<ApiResponse> asignarPorcentajes(@RequestBody PorcentajesRequestDTO request) {
+        return service.asignarPorcentajesManuales(request);
+    }
 
 }
