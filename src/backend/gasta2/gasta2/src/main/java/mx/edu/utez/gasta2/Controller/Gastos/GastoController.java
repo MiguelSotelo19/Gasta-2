@@ -19,4 +19,9 @@ public class GastoController {
     public  ResponseEntity<ApiResponse> registrarGasto(@RequestBody GastoDTO dto) {
         return gastoService.registrarGasto(dto);
     }
+
+    @PutMapping("/editar/{id}")
+    public ResponseEntity<ApiResponse> editarGasto(@PathVariable("id") Long id, @RequestBody GastoDTO dto) {
+        return gastoService.editarGasto(id, dto);
+    }
 }
