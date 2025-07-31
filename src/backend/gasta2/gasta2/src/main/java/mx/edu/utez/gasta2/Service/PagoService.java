@@ -20,6 +20,9 @@ public class PagoService {
     public ResponseEntity<ApiResponse> getAll(Long idEspacio){
         return new ResponseEntity<>(new ApiResponse(repository.findAllByEspacioId(idEspacio), HttpStatus.OK,"Obteniendo todos los pagos del espacio: " +idEspacio), HttpStatus.OK);
     }
-    
+    @Transactional(rollbackFor = {SQLException.class})
+    public ResponseEntity<ApiResponse> getOne(Long idUuario, Long idEspacio){
+        return new ResponseEntity<>(new ApiResponse(repository.findAllByUsuarioAndEspacio(idUuario, idEspacio), HttpStatus.OK, "Espacios individuales"), HttpStatus.OK);
+    }
 
 }

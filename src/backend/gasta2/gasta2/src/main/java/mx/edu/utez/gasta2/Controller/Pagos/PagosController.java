@@ -20,4 +20,9 @@ public class PagosController {
     public ResponseEntity<ApiResponse> getAll(@PathVariable Long idEspacio){
         return service.getAll(idEspacio);
     }
+
+    @GetMapping("/{idUsuario}/{idEspacio}")
+    public ResponseEntity<ApiResponse> getOneByID(@PathVariable Long idUsuario, @PathVariable Long idEspacio){
+        return service.getOne(idUsuario,idEspacio);
+    }
 }
