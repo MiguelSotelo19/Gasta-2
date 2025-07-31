@@ -4,10 +4,7 @@ import mx.edu.utez.gasta2.Config.ApiResponse;
 import mx.edu.utez.gasta2.Service.PagoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/pagos")
@@ -24,5 +21,10 @@ public class PagosController {
     @GetMapping("/{idUsuario}/{idEspacio}")
     public ResponseEntity<ApiResponse> getOneByID(@PathVariable Long idUsuario, @PathVariable Long idEspacio){
         return service.getOne(idUsuario,idEspacio);
+    }
+
+    @PatchMapping("status/{idPago}")
+    public ResponseEntity<ApiResponse> changeStatus(@PathVariable Long idPago){
+        return service.changeStatus(idPago);
     }
 }
