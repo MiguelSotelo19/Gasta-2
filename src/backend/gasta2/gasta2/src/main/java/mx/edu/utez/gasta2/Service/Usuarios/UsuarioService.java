@@ -6,6 +6,7 @@ import mx.edu.utez.gasta2.Model.Categorias.CategoriaRepository;
 import mx.edu.utez.gasta2.Model.Espacios.EspacioBean;
 import mx.edu.utez.gasta2.Model.Espacios.EspaciosRepository;
 import mx.edu.utez.gasta2.Model.Gastos.GastoRepository;
+import mx.edu.utez.gasta2.Model.Pagos.PagosRepository;
 import mx.edu.utez.gasta2.Model.PasswordReset.PasswordReset;
 import mx.edu.utez.gasta2.Model.PasswordReset.PasswordResetRepository;
 import mx.edu.utez.gasta2.Model.Roles.RolBean;
@@ -66,7 +67,8 @@ public class UsuarioService {
     private EspaciosRepository espaciosRepository;
 
 
-
+    @Autowired
+    private PagosRepository pagoRepository;
     public ResponseEntity<ApiResponse> getAllUsers() {
         List<UsuarioBean> usuarios = repository.findAll();
         return new ResponseEntity<>(new ApiResponse(usuarios, HttpStatus.OK, "Usuarios encontrados"), HttpStatus.OK);
@@ -233,8 +235,8 @@ public class UsuarioService {
 
         UsuarioBean usuario = userFound.get();
 
-        // Elimina gastos personales
-        gastoRepository.deleteByUsuarioId(usuario.getId());
+        // Elimina pagos del usuario (opcional, si quieres limpiar sus deudas también)
+        pagoRepository.deleteAllByUsuarioId(usuario.getId());
 
         // Elimina espacios creados por el usuario
         List<UsuariosEspaciosBean> creados = userEspaciosRepository.findAllByUsuarioAndRolRol(usuario, "Administrador");
@@ -251,15 +253,17 @@ public class UsuarioService {
             // Elimina espacio
             espaciosRepository.delete(espacio);
         }
-        //Elimina relaciones usuarios_espacios
+
+        // Elimina relaciones usuarios_espacios
         userEspaciosRepository.deleteAllByUsuario(usuario);
 
-        //Eliminar reseteos de contraseña
+        // Elimina reseteos de contraseña
         resetRepository.deleteByEmail(usuario.getCorreo());
 
-        //Eliminar usuario
+        // Elimina usuario
         repository.delete(usuario);
 
         return new ResponseEntity<>(new ApiResponse(HttpStatus.OK, false, "Cuenta eliminada exitosamente"), HttpStatus.OK);
     }
+
 }

@@ -89,6 +89,7 @@ public class MainSecurity {
                                 .requestMatchers("/api/gastos/registrar").hasAnyRole("Administrador","Invitado")
                                 .requestMatchers("/api/gastos/editar/**").hasAnyRole("Administrador","Invitado")
                                 .requestMatchers("/api/usuarios-espacios/asignar-porcentajes").hasAnyRole("Administrador")
+                                .requestMatchers("api/gastos/espacio/**").hasAnyRole("Administrador")
                                 .anyRequest().authenticated()
                 )
                 .httpBasic(Customizer.withDefaults())

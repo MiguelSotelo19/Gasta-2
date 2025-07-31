@@ -2,7 +2,10 @@ package mx.edu.utez.gasta2.Model.Usuarios;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import mx.edu.utez.gasta2.Model.Categorias.CategoriaBean;
 import mx.edu.utez.gasta2.Model.Gastos.GastoBean;
+import mx.edu.utez.gasta2.Model.Pagos.PagoBean;
+
 import java.util.Set;
 
 @Entity
@@ -25,12 +28,16 @@ public class UsuarioBean {
     @Column()
     private Integer espaciosdisponibles;
 
-    @JsonIgnore
-    @OneToMany(mappedBy = "usuario", fetch = FetchType.LAZY)
-    private Set<GastoBean> gastoBeans;
+//    @JsonIgnore
+//    @OneToMany(mappedBy = "usuario", fetch = FetchType.LAZY)
+//    private Set<GastoBean> gastoBeans;
 
     @Column(columnDefinition = "BOOLEAN")
     private Boolean status;
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "usuario", fetch = FetchType.LAZY)
+    private Set<PagoBean> pagoBeans;
 
     public Boolean getStatus() {
         return status;
