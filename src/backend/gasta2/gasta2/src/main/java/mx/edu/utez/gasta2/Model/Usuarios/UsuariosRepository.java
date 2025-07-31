@@ -15,6 +15,7 @@ public interface UsuariosRepository extends JpaRepository<UsuarioBean, Long> {
 
     Optional<UsuarioBean>findByCorreo(String correo);
 
-
+    @Query("SELECT ue.usuario, ue.porcentajeGasto FROM UsuariosEspaciosBean ue WHERE ue.espacio.id = :idEspacio")
+    List<Object[]>findUsuariosConPorcentajeByEspacioId(@Param("idEspacio") Long idEspacio);
 
 }

@@ -14,5 +14,7 @@ public interface GastoRepository extends JpaRepository<GastoBean, Long> {
 
    //List<GastoBean> findAllByTipogasto_Espacio_Id(Long idEspacio);
 
-    
+    @Query("SELECT g FROM GastoBean g JOIN g.tipogasto c WHERE c.espacio.id = :idEspacio")
+    List<GastoBean> findAllByEspacioId(@Param("idEspacio") Long idEspacio);
+
 }

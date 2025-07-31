@@ -1,5 +1,6 @@
 package mx.edu.utez.gasta2.Model.Pagos;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import mx.edu.utez.gasta2.Model.Espacios.EspacioBean;
 import mx.edu.utez.gasta2.Model.Gastos.GastoBean;
@@ -22,10 +23,12 @@ public class PagoBean {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "fk_id_gasto", nullable = true)
+    @JsonIgnore
     private GastoBean gasto;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "fk_id_usuario", nullable = false)
+    @JsonIgnore
     private UsuarioBean usuario;
 
     public PagoBean() {

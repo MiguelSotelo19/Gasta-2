@@ -16,5 +16,10 @@ public class PagoService {
     @Autowired
     private PagosRepository repository;
 
+    @Transactional(readOnly = true)
+    public ResponseEntity<ApiResponse> getAll(Long idEspacio){
+        return new ResponseEntity<>(new ApiResponse(repository.findAllByEspacioId(idEspacio), HttpStatus.OK,"Obteniendo todos los pagos del espacio: " +idEspacio), HttpStatus.OK);
+    }
+    
 
 }

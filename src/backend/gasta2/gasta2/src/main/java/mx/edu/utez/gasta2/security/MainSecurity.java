@@ -90,6 +90,7 @@ public class MainSecurity {
                                 .requestMatchers("/api/gastos/editar/**").hasAnyRole("Administrador","Invitado")
                                 .requestMatchers("/api/usuarios-espacios/asignar-porcentajes").hasAnyRole("Administrador")
                                 .requestMatchers("api/gastos/espacio/**").hasAnyRole("Administrador")
+                                .requestMatchers("/api/pagos/all/**").hasAnyRole("Administrador")
                                 .anyRequest().authenticated()
                 )
                 .httpBasic(Customizer.withDefaults())
