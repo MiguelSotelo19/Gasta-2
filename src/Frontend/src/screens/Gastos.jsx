@@ -4,11 +4,12 @@ import { toast } from "react-toastify";
 import "./css/general.css";
 import "./css/NuevoGasto.css";
 import { getCategoriesByEspacio } from "../services/categoryService";
+import ModalEditarGasto from "../components/ModalEditarGasto";
 
 export const Gastos = ({ espacioActual, nombreEspacio }) => {
   // Estados
   const API_URL = import.meta.env.VITE_API_URL;
-  const urlGastos = `${API_URL}/api/gastos/espacio/${espacioActual.idEspacio}`
+  const urlGastos = `${API_URL}/api/gastos/espacio/${espacioActual?.idEspacio}`;
   const [mostrarFormulario, setMostrarFormulario] = useState(false);
   const [gastos, setGastos] = useState([]);
   const [categorias, setCategorias] = useState([]);
@@ -23,10 +24,18 @@ export const Gastos = ({ espacioActual, nombreEspacio }) => {
     cantidad: false,
     idCategoria: false
   });
-  const [editandoGasto, setEditandoGasto] = useState(null);
   const [esAdmin, setEsAdmin] = useState(false);
   const [cargando, setCargando] = useState(false);
   const [cargandoCategorias, setCargandoCategorias] = useState(false);
+  
+  // Estados para el modal de edición
+  const [modalEditarAbierto, setModalEditarAbierto] = useState(false);
+  const [gastoSeleccionado, setGastoSeleccionado] = useState(null);
+  const [formDataEdicion, setFormDataEdicion] = useState({
+    cantidad: '',
+    descripcion: '',
+    idCategoria: ''
+  });
 
   // Cargar datos al cambiar el espacio actual
   useEffect(() => {
@@ -49,7 +58,7 @@ export const Gastos = ({ espacioActual, nombreEspacio }) => {
     }
   };
 
-  // Cargar categorías del espacio
+  // Cargar categorías del espacio - FUNCIÓN CORREGIDA
   const cargarCategorias = async () => {
     if (!espacioActual?.idEspacio) return;
     
@@ -57,6 +66,7 @@ export const Gastos = ({ espacioActual, nombreEspacio }) => {
     try {
       const response = await getCategoriesByEspacio(espacioActual.idEspacio);
       
+      // Usar la misma lógica que funciona en Categorias.jsx
       if (response.data && Array.isArray(response.data)) {
         setCategorias(response.data);
       } else {
@@ -133,7 +143,7 @@ export const Gastos = ({ espacioActual, nombreEspacio }) => {
     }
   };
 
-  // Enviar formulario
+  // Enviar formulario para nuevo gasto
   const handleSubmit = async (e) => {
     e.preventDefault();
     
@@ -149,16 +159,10 @@ export const Gastos = ({ espacioActual, nombreEspacio }) => {
         descripcion: formData.descripcion,
         idCategoria: parseInt(formData.idCategoria),
         idEspacio: parseInt(formData.idEspacio),
-        //idUsuario: parseInt(formData.idUsuario)
       };
 
-      if (editandoGasto) {
-        await axiosInstance.put(`${API_URL}/api/gastos/editar/${editandoGasto.id}`, payload);
-        toast.success("Gasto actualizado correctamente");
-      } else {
-        await axiosInstance.post(`${API_URL}/api/gastos/registrar`, payload);
-        toast.success("Gasto registrado correctamente");
-      }
+      await axiosInstance.post(`${API_URL}/api/gastos/registrar`, payload);
+      toast.success("Gasto registrado correctamente");
 
       resetearFormulario();
       await cargarGastos();
@@ -169,7 +173,7 @@ export const Gastos = ({ espacioActual, nombreEspacio }) => {
       
       if (error.response) {
         errorMessage = error.response.data?.message || 
-                     (error.response.status === 403 ? "No tienes permisos de administrador" : errorMessage);
+                    (error.response.status === 403 ? "No tienes permisos de administrador" : errorMessage);
       }
       
       toast.error(errorMessage);
@@ -178,17 +182,38 @@ export const Gastos = ({ espacioActual, nombreEspacio }) => {
     }
   };
 
-  // Editar gasto existente
+  // Editar gasto existente (abre modal)
   const handleEditarGasto = (gasto) => {
-    setEditandoGasto(gasto);
-    setFormData({
+    setGastoSeleccionado(gasto);
+    setFormDataEdicion({
       cantidad: gasto.cantidad.toString(),
       descripcion: gasto.descripcion || '',
-      idCategoria: gasto.idCategoria.toString(),
-      idEspacio: espacioActual.idEspacio,
-      idUsuario: localStorage.getItem("userId")
+      idCategoria: gasto.idCategoria.toString()
     });
-    setMostrarFormulario(true);
+    setModalEditarAbierto(true);
+  };
+
+  // Guardar cambios desde el modal de edición
+  const handleGuardarEdicion = async () => {
+    try {
+      setCargando(true);
+      const payload = {
+        cantidad: parseFloat(formDataEdicion.cantidad),
+        descripcion: formDataEdicion.descripcion,
+        idCategoria: parseInt(formDataEdicion.idCategoria),
+        idEspacio: parseInt(espacioActual.idEspacio),
+      };
+
+      await axiosInstance.put(`${API_URL}/api/gastos/editar/${gastoSeleccionado.id}`, payload);
+      toast.success("Gasto actualizado correctamente");
+      setModalEditarAbierto(false);
+      await cargarGastos();
+    } catch (error) {
+      console.error("Error actualizando gasto:", error);
+      toast.error(error.response?.data?.message || "Error al actualizar el gasto");
+    } finally {
+      setCargando(false);
+    }
   };
 
   // Cancelar edición/creación
@@ -206,7 +231,18 @@ export const Gastos = ({ espacioActual, nombreEspacio }) => {
       idUsuario: localStorage.getItem("userId")
     });
     setMostrarFormulario(false);
-    setEditandoGasto(null);
+  };
+
+  // Obtener nombre de categoría para mostrar en la tabla - FUNCIÓN CORREGIDA
+  const obtenerNombreCategoria = (idCategoria) => {
+    if (!categorias || categorias.length === 0) {
+      return 'Sin categoría';
+    }
+    
+    // Buscar la categoría por ID (usando el campo 'id' como en Categorias.jsx)
+    const categoria = categorias.find(c => c.id === idCategoria);
+    
+    return categoria?.nombre || 'Sin categoría';
   };
 
   // Render
@@ -235,10 +271,10 @@ export const Gastos = ({ espacioActual, nombreEspacio }) => {
         </button>
       </div>
 
-      {/* Formulario */}
+      {/* Formulario para nuevo gasto */}
       {mostrarFormulario && (
         <div className="nuevo-gasto-container">
-          <h3>{editandoGasto ? 'Editar Gasto' : 'Nuevo Gasto'}</h3>
+          <h3>Nuevo Gasto</h3>
           <form onSubmit={handleSubmit}>
             <div className="form-group">
               <label>Categoría *</label>
@@ -317,7 +353,7 @@ export const Gastos = ({ espacioActual, nombreEspacio }) => {
                 disabled={cargando || categorias.length === 0}
                 className="primary-button"
               >
-                {cargando ? 'Procesando...' : editandoGasto ? 'Actualizar' : 'Guardar'}
+                {cargando ? 'Procesando...' : 'Guardar'}
               </button>
             </div>
           </form>
@@ -356,33 +392,41 @@ export const Gastos = ({ espacioActual, nombreEspacio }) => {
                 </tr>
               </thead>
               <tbody>
-                {gastos.map(gasto => {
-                  const categoria = categorias.find(c => c.id === gasto.idCategoria);
-                  return (
-                    <tr key={gasto.id}>
-                      <td>{categoria?.nombre || 'Sin categoría'}</td>
-                      <td>{gasto.descripcion || '-'}</td>
-                      <td>${gasto.cantidad.toFixed(2)}</td>
-                      <td>{new Date(gasto.fecha).toLocaleDateString()}</td>
-                      {esAdmin && (
-                        <td>
-                          <button 
-                            onClick={() => handleEditarGasto(gasto)}
-                            disabled={cargando}
-                            className="edit-button"
-                          >
-                            ✏️ Editar
-                          </button>
-                        </td>
-                      )}
-                    </tr>
-                  );
-                })}
+                {gastos.map(gasto => (
+                  <tr key={gasto.id}>
+                    <td>{obtenerNombreCategoria(gasto.idCategoria)}</td>
+                    <td>{gasto.descripcion || '-'}</td>
+                    <td>${gasto.cantidad.toFixed(2)}</td>
+                    <td>{new Date(gasto.fecha).toLocaleDateString()}</td>
+                    {esAdmin && (
+                      <td>
+                        <button 
+                          onClick={() => handleEditarGasto(gasto)}
+                          disabled={cargando}
+                          className="edit-button"
+                        >
+                          ✏️ Editar
+                        </button>
+                      </td>
+                    )}
+                  </tr>
+                ))}
               </tbody>
             </table>
           </div>
         )}
       </div>
+
+      {/* Modal de edición */}
+      <ModalEditarGasto
+        abierto={modalEditarAbierto}
+        onClose={() => setModalEditarAbierto(false)}
+        onGuardar={handleGuardarEdicion}
+        categorias={categorias}
+        formData={formDataEdicion}
+        setFormData={setFormDataEdicion}
+        cargando={cargando}
+      />
     </div>
   );
 };
