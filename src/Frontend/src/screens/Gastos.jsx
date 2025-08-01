@@ -7,6 +7,8 @@ import { getCategoriesByEspacio } from "../services/categoryService";
 
 export const Gastos = ({ espacioActual, nombreEspacio }) => {
   // Estados
+  const API_URL = import.meta.env.VITE_API_URL;
+  const urlGastos = `${API_URL}/api/gastos/espacio/${espacioActual.idEspacio}`
   const [mostrarFormulario, setMostrarFormulario] = useState(false);
   const [gastos, setGastos] = useState([]);
   const [categorias, setCategorias] = useState([]);
@@ -77,7 +79,7 @@ export const Gastos = ({ espacioActual, nombreEspacio }) => {
     
     setCargando(true);
     try {
-      const response = await axiosInstance.get(`/api/gastos/por-espacio/${espacioActual.idEspacio}`);
+      const response = await axiosInstance.get(urlGastos);
       
       if (response.data && Array.isArray(response.data.data)) {
         setGastos(response.data.data);
@@ -147,14 +149,14 @@ export const Gastos = ({ espacioActual, nombreEspacio }) => {
         descripcion: formData.descripcion,
         idCategoria: parseInt(formData.idCategoria),
         idEspacio: parseInt(formData.idEspacio),
-        idUsuario: parseInt(formData.idUsuario)
+        //idUsuario: parseInt(formData.idUsuario)
       };
 
       if (editandoGasto) {
-        await axiosInstance.put(`/api/gastos/editar/${editandoGasto.id}`, payload);
+        await axiosInstance.put(`${API_URL}/api/gastos/editar/${editandoGasto.id}`, payload);
         toast.success("Gasto actualizado correctamente");
       } else {
-        await axiosInstance.post("/api/gastos/registrar", payload);
+        await axiosInstance.post(`${API_URL}/api/gastos/registrar`, payload);
         toast.success("Gasto registrado correctamente");
       }
 
