@@ -98,4 +98,9 @@ public class Usuarios_Espacios_Controller {
         return service.asignarPorcentajesManuales(request);
     }
 
+    @GetMapping("all/{idEspacio}")
+    public ResponseEntity<ApiResponse> allBySpace(@PathVariable Long idEspacio){
+        return service.allBySpace(idEspacio);
+    }
+
 }

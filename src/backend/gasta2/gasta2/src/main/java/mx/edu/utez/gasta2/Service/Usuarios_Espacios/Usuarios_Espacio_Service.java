@@ -357,7 +357,14 @@ public class Usuarios_Espacio_Service {
         return new ResponseEntity<>(new ApiResponse(HttpStatus.OK, false, "Porcentajes asignados correctamente"), HttpStatus.OK);
     }
 
+    @Transactional(rollbackFor = {SQLException.class})
+    public ResponseEntity<ApiResponse> allBySpace(Long idEspacio){
+        Optional<EspacioBean> findSpace = espaciosRepository.findById(idEspacio);
 
+        if(findSpace.isPresent()){
+            return new ResponseEntity<>(new ApiResponse(repository.findUsuariosByEspacioId(idEspacio), HttpStatus.OK, "Todos los usuarios en el espacio con ID: " +idEspacio), HttpStatus.OK);
+        }
 
-
+        return new ResponseEntity<>(new ApiResponse(HttpStatus.NOT_FOUND, true, "El espacio no fue encontrado"), HttpStatus.NOT_FOUND);
+    }
 }

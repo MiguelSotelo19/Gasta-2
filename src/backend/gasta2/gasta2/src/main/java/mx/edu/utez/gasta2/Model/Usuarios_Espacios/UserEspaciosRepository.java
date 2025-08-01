@@ -3,6 +3,8 @@ package mx.edu.utez.gasta2.Model.Usuarios_Espacios;
 import mx.edu.utez.gasta2.Model.Espacios.EspacioBean;
 import mx.edu.utez.gasta2.Model.Usuarios.UsuarioBean;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 import java.util.Optional;
@@ -32,5 +34,9 @@ public interface UserEspaciosRepository extends JpaRepository<UsuariosEspaciosBe
     boolean existsByUsuario_IdAndEspacio_Id(Long usuarioId, Long espacioId);
 
     boolean existsByUsuario_IdAndEspacio_IdAndRol_Rol(Long idUsuario, Long idEspacio, String Rol);
+    @Query("SELECT ue.usuario, ue.porcentajeGasto FROM UsuariosEspaciosBean ue WHERE ue.espacio.id = :idEspacio")
+    List<Object[]>findUsuariosConPorcentajeByEspacioId(@Param("idEspacio") Long idEspacio);
 
+    @Query("SELECT ue.usuario FROM UsuariosEspaciosBean ue WHERE ue.espacio.id = :idEspacio")
+    List<UsuarioBean> findUsuariosByEspacioId(@Param("idEspacio") Long idEspacio);
 }

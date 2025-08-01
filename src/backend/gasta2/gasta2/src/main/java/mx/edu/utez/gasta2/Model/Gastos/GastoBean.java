@@ -3,6 +3,7 @@ package mx.edu.utez.gasta2.Model.Gastos;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import mx.edu.utez.gasta2.Model.Categorias.CategoriaBean;
+import mx.edu.utez.gasta2.Model.Pagos.PagoBean;
 import mx.edu.utez.gasta2.Model.Usuarios.UsuarioBean;
 
 import java.time.LocalDate;
@@ -25,25 +26,28 @@ public class GastoBean {
     @Column(columnDefinition = "DATE")
     private LocalDate fecha;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "fk_id_usuario")
-    private UsuarioBean usuario;
+//    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+//    @JoinColumn(name = "fk_id_usuario")
+//    private UsuarioBean usuario;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "fk_id_categoria")
     private CategoriaBean tipogasto;
 
+    @JsonIgnore
+    @OneToMany(mappedBy = "gasto", fetch = FetchType.LAZY)
+    private Set<PagoBean> pagoBeans;
     public GastoBean() {
     }
 
-    public GastoBean(Long id, String descripcion, int cantidad, LocalDate fecha, UsuarioBean usuario, CategoriaBean tipogasto) {
-        this.id = id;
-        this.descripcion = descripcion;
-        this.cantidad = cantidad;
-        this.fecha = fecha;
-        this.usuario = usuario;
-        this.tipogasto = tipogasto;
-    }
+//    public GastoBean(Long id, String descripcion, int cantidad, LocalDate fecha, UsuarioBean usuario, CategoriaBean tipogasto) {
+//        this.id = id;
+//        this.descripcion = descripcion;
+//        this.cantidad = cantidad;
+//        this.fecha = fecha;
+//        this.usuario = usuario;
+//        this.tipogasto = tipogasto;
+//    }
     public Long getId() {
         return id;
     }
@@ -76,13 +80,13 @@ public class GastoBean {
         this.fecha = fecha;
     }
 
-    public UsuarioBean getUsuario() {
-        return usuario;
-    }
-
-    public void setUsuario(UsuarioBean usuario) {
-        this.usuario = usuario;
-    }
+//    public UsuarioBean getUsuario() {
+//        return usuario;
+//    }
+//
+//    public void setUsuario(UsuarioBean usuario) {
+//        this.usuario = usuario;
+//    }
 
     public CategoriaBean getTipogasto() {
         return tipogasto;
@@ -90,5 +94,13 @@ public class GastoBean {
 
     public void setTipogasto(CategoriaBean tipogasto) {
         this.tipogasto = tipogasto;
+    }
+
+    public Set<PagoBean> getPagoBeans() {
+        return pagoBeans;
+    }
+
+    public void setPagoBeans(Set<PagoBean> pagoBeans) {
+        this.pagoBeans = pagoBeans;
     }
 }
