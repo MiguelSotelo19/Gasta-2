@@ -93,6 +93,7 @@ public class MainSecurity {
                                 .requestMatchers("api/pagos/**").hasAnyRole("Administrador")
                                 .requestMatchers("/api/pagos/all/**").hasAnyRole("Administrador")
                                 .requestMatchers("/api/pagos/satus/**").hasAnyRole("Administrador")
+                                .requestMatchers("/api/usuarios-espacios/all/").hasAnyRole("Administrador")
 
                                 .anyRequest().authenticated()
                 )

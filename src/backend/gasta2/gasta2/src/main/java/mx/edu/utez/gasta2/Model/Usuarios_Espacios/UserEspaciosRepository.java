@@ -36,4 +36,7 @@ public interface UserEspaciosRepository extends JpaRepository<UsuariosEspaciosBe
     boolean existsByUsuario_IdAndEspacio_IdAndRol_Rol(Long idUsuario, Long idEspacio, String Rol);
     @Query("SELECT ue.usuario, ue.porcentajeGasto FROM UsuariosEspaciosBean ue WHERE ue.espacio.id = :idEspacio")
     List<Object[]>findUsuariosConPorcentajeByEspacioId(@Param("idEspacio") Long idEspacio);
+
+    @Query("SELECT ue.usuario FROM UsuariosEspaciosBean ue WHERE ue.espacio.id = :idEspacio")
+    List<UsuarioBean> findUsuariosByEspacioId(@Param("idEspacio") Long idEspacio);
 }
