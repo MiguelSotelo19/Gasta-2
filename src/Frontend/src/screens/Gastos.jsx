@@ -4,11 +4,12 @@ import { toast } from "react-toastify";
 import "./css/general.css";
 import "./css/NuevoGasto.css";
 import { getCategoriesByEspacio } from "../services/categoryService";
+import ModalAsignarPorcentajes from "../components/ModalAsignarPorcentajes";
 
 export const Gastos = ({ espacioActual, nombreEspacio }) => {
-  // Estados
   const API_URL = import.meta.env.VITE_API_URL;
-  const urlGastos = `${API_URL}/api/gastos/espacio/${espacioActual.idEspacio}`
+  const urlGastos = `${API_URL}/api/gastos/espacio/${espacioActual?.idEspacio}`;
+  
   const [mostrarFormulario, setMostrarFormulario] = useState(false);
   const [gastos, setGastos] = useState([]);
   const [categorias, setCategorias] = useState([]);
@@ -24,11 +25,14 @@ export const Gastos = ({ espacioActual, nombreEspacio }) => {
     idCategoria: false
   });
   const [editandoGasto, setEditandoGasto] = useState(null);
+  
+  const [modalAbierto, setModalAbierto] = useState(false);
+  const [miembros, setMiembros] = useState([]);
+  
   const [esAdmin, setEsAdmin] = useState(false);
   const [cargando, setCargando] = useState(false);
   const [cargandoCategorias, setCargandoCategorias] = useState(false);
 
-  // Cargar datos al cambiar el espacio actual
   useEffect(() => {
     if (espacioActual?.idEspacio) {
       setEsAdmin(espacioActual.rol === 'Administrador');
@@ -43,13 +47,30 @@ export const Gastos = ({ espacioActual, nombreEspacio }) => {
 
   const cargarDatosIniciales = async () => {
     try {
-      await Promise.all([cargarCategorias(), cargarGastos()]);
+      await Promise.all([
+        cargarCategorias(), 
+        cargarGastos(),
+        cargarMiembros()
+      ]);
     } catch (error) {
       console.error("Error cargando datos iniciales:", error);
     }
   };
 
-  // Cargar categorías del espacio
+  const cargarMiembros = async () => {
+    if (!espacioActual?.idEspacio) return;
+    
+    try {
+      const response = await axiosInstance.get(
+        `${API_URL}/api/usuarios-espacios/all/${espacioActual.idEspacio}`
+      );
+      setMiembros(response.data.data || []);
+    } catch (error) {
+      console.error("Error cargando miembros:", error);
+      setMiembros([]);
+    }
+  };
+
   const cargarCategorias = async () => {
     if (!espacioActual?.idEspacio) return;
     
@@ -73,7 +94,6 @@ export const Gastos = ({ espacioActual, nombreEspacio }) => {
     }
   };
 
-  // Cargar gastos del espacio
   const cargarGastos = async () => {
     if (!espacioActual?.idEspacio) return;
     
@@ -107,7 +127,6 @@ export const Gastos = ({ espacioActual, nombreEspacio }) => {
     }
   };
 
-  // Validar campos del formulario
   const validarCampos = () => {
     const nuevosErrores = {
       cantidad: !formData.cantidad || isNaN(formData.cantidad) || parseFloat(formData.cantidad) <= 0,
@@ -117,12 +136,10 @@ export const Gastos = ({ espacioActual, nombreEspacio }) => {
     return !Object.values(nuevosErrores).some(error => error);
   };
 
-  // Manejador de cambios en el formulario
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
     
-    // Validación en tiempo real
     if (name === 'cantidad' || name === 'idCategoria') {
       setErrores(prev => ({
         ...prev,
@@ -133,7 +150,6 @@ export const Gastos = ({ espacioActual, nombreEspacio }) => {
     }
   };
 
-  // Enviar formulario
   const handleSubmit = async (e) => {
     e.preventDefault();
     
@@ -149,7 +165,6 @@ export const Gastos = ({ espacioActual, nombreEspacio }) => {
         descripcion: formData.descripcion,
         idCategoria: parseInt(formData.idCategoria),
         idEspacio: parseInt(formData.idEspacio),
-        //idUsuario: parseInt(formData.idUsuario)
       };
 
       if (editandoGasto) {
@@ -178,7 +193,6 @@ export const Gastos = ({ espacioActual, nombreEspacio }) => {
     }
   };
 
-  // Editar gasto existente
   const handleEditarGasto = (gasto) => {
     setEditandoGasto(gasto);
     setFormData({
@@ -191,25 +205,27 @@ export const Gastos = ({ espacioActual, nombreEspacio }) => {
     setMostrarFormulario(true);
   };
 
-  // Cancelar edición/creación
   const handleCancelar = () => {
     resetearFormulario();
   };
 
-  // Resetear formulario
   const resetearFormulario = () => {
     setFormData({ 
       cantidad: '',
       descripcion: '',
       idCategoria: '',
-      idEspacio: espacioActual.idEspacio,
+      idEspacio: espacioActual?.idEspacio,
       idUsuario: localStorage.getItem("userId")
     });
     setMostrarFormulario(false);
     setEditandoGasto(null);
   };
 
-  // Render
+  const handleModalSuccess = () => {
+    cargarMiembros();
+    toast.success("Porcentajes asignados correctamente");
+  };
+
   if (!espacioActual) {
     return (
       <div className="empty-state">
@@ -219,170 +235,189 @@ export const Gastos = ({ espacioActual, nombreEspacio }) => {
   }
 
   return (
-    <div className="gastos-container">
-      {/* Header */}
-      <div className="dashboard-header">
-        <div className="dashboard-title">
-          <h1>Gastos</h1>
-          <p>Administra los gastos de: {nombreEspacio}</p>
-        </div>
-        <button 
-          className="primary-button"
-          onClick={() => mostrarFormulario ? handleCancelar() : setMostrarFormulario(true)}
-          disabled={cargando || cargandoCategorias}
-        >
-          {mostrarFormulario ? 'Cancelar' : '+ Nuevo Gasto'}
-        </button>
-      </div>
-
-      {/* Formulario */}
-      {mostrarFormulario && (
-        <div className="nuevo-gasto-container">
-          <h3>{editandoGasto ? 'Editar Gasto' : 'Nuevo Gasto'}</h3>
-          <form onSubmit={handleSubmit}>
-            <div className="form-group">
-              <label>Categoría *</label>
-              {cargandoCategorias ? (
-                <div className="loading-message">Cargando categorías...</div>
-              ) : categorias.length === 0 ? (
-                <div className="error-message">
-                  No hay categorías disponibles. Crea categorías primero.
-                </div>
-              ) : (
-                <>
-                  <select
-                    name="idCategoria"
-                    value={formData.idCategoria}
-                    onChange={handleChange}
-                    className={errores.idCategoria ? 'error' : ''}
-                    disabled={cargando}
-                  >
-                    <option value="">Seleccione una categoría</option>
-                    {categorias.map(categoria => (
-                      <option key={categoria.id} value={categoria.id}>
-                        {categoria.nombre}
-                      </option>
-                    ))}
-                  </select>
-                  {errores.idCategoria && (
-                    <span className="error-message">Seleccione una categoría</span>
-                  )}
-                </>
-              )}
-            </div>
-
-            <div className="form-group">
-              <label>Cantidad *</label>
-              <input
-                type="number"
-                name="cantidad"
-                value={formData.cantidad}
-                onChange={handleChange}
-                min="0"
-                step="0.01"
-                className={errores.cantidad ? 'error' : ''}
-                disabled={cargando}
-                placeholder="0.00"
-              />
-              {errores.cantidad && (
-                <span className="error-message">
-                  {!formData.cantidad ? 'Campo requerido' : 'Debe ser mayor a 0'}
-                </span>
-              )}
-            </div>
-
-            <div className="form-group">
-              <label>Descripción (opcional)</label>
-              <textarea
-                name="descripcion"
-                value={formData.descripcion}
-                onChange={handleChange}
-                rows="3"
-                disabled={cargando}
-                placeholder="Descripción del gasto"
-              />
-            </div>
-
-            <div className="form-actions">
-              <button 
-                type="button" 
-                onClick={handleCancelar}
-                disabled={cargando}
+    <>
+      <div className="gastos-container">
+        <div className="dashboard-header">
+          <div className="dashboard-title">
+            <h1>Gastos</h1>
+            <p>Administra los gastos de: {nombreEspacio}</p>
+          </div>
+          <div className="header-buttons">
+            {esAdmin && (
+              <button
                 className="secondary-button"
+                onClick={() => setModalAbierto(true)}
+                disabled={cargando}
+                style={{ marginRight: '1rem' }}
               >
-                Cancelar
-              </button>
-              <button 
-                type="submit" 
-                disabled={cargando || categorias.length === 0}
-                className="primary-button"
-              >
-                {cargando ? 'Procesando...' : editandoGasto ? 'Actualizar' : 'Guardar'}
-              </button>
-            </div>
-          </form>
-        </div>
-      )}
-
-      {/* Lista de gastos */}
-      <div className="historial-gastos">
-        <h3>Historial</h3>
-        
-        {cargando && gastos.length === 0 ? (
-          <div className="loading-message">Cargando gastos...</div>
-        ) : gastos.length === 0 ? (
-          <div className="empty-state">
-            <p>No hay gastos registrados</p>
-            {!mostrarFormulario && (
-              <button 
-                className="primary-button"
-                onClick={() => setMostrarFormulario(true)}
-                style={{ marginTop: '1rem' }}
-              >
-                Crear primer gasto
+                Asignar Porcentajes
               </button>
             )}
+            <button 
+              className="primary-button"
+              onClick={() => mostrarFormulario ? handleCancelar() : setMostrarFormulario(true)}
+              disabled={cargando || cargandoCategorias}
+            >
+              {mostrarFormulario ? 'Cancelar' : '+ Nuevo Gasto'}
+            </button>
           </div>
-        ) : (
-          <div className="table-container">
-            <table className="gastos-table">
-              <thead>
-                <tr>
-                  <th>Categoría</th>
-                  <th>Descripción</th>
-                  <th>Cantidad</th>
-                  <th>Fecha</th>
-                  {esAdmin && <th>Acciones</th>}
-                </tr>
-              </thead>
-              <tbody>
-                {gastos.map(gasto => {
-                  const categoria = categorias.find(c => c.id === gasto.idCategoria);
-                  return (
-                    <tr key={gasto.id}>
-                      <td>{categoria?.nombre || 'Sin categoría'}</td>
-                      <td>{gasto.descripcion || '-'}</td>
-                      <td>${gasto.cantidad.toFixed(2)}</td>
-                      <td>{new Date(gasto.fecha).toLocaleDateString()}</td>
-                      {esAdmin && (
-                        <td>
-                          <button 
-                            onClick={() => handleEditarGasto(gasto)}
-                            disabled={cargando}
-                            className="edit-button"
-                          >
-                            ✏️ Editar
-                          </button>
-                        </td>
-                      )}
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+        </div>
+
+        {mostrarFormulario && (
+          <div className="nuevo-gasto-container">
+            <h3>{editandoGasto ? 'Editar Gasto' : 'Nuevo Gasto'}</h3>
+            <form onSubmit={handleSubmit}>
+              <div className="form-group">
+                <label>Categoría *</label>
+                {cargandoCategorias ? (
+                  <div className="loading-message">Cargando categorías...</div>
+                ) : categorias.length === 0 ? (
+                  <div className="error-message">
+                    No hay categorías disponibles. Crea categorías primero.
+                  </div>
+                ) : (
+                  <>
+                    <select
+                      name="idCategoria"
+                      value={formData.idCategoria}
+                      onChange={handleChange}
+                      className={errores.idCategoria ? 'error' : ''}
+                      disabled={cargando}
+                    >
+                      <option value="">Seleccione una categoría</option>
+                      {categorias.map(categoria => (
+                        <option key={categoria.id} value={categoria.id}>
+                          {categoria.nombre}
+                        </option>
+                      ))}
+                    </select>
+                    {errores.idCategoria && (
+                      <span className="error-message">Seleccione una categoría</span>
+                    )}
+                  </>
+                )}
+              </div>
+
+              <div className="form-group">
+                <label>Cantidad *</label>
+                <input
+                  type="number"
+                  name="cantidad"
+                  value={formData.cantidad}
+                  onChange={handleChange}
+                  min="0"
+                  step="0.01"
+                  className={errores.cantidad ? 'error' : ''}
+                  disabled={cargando}
+                  placeholder="0.00"
+                />
+                {errores.cantidad && (
+                  <span className="error-message">
+                    {!formData.cantidad ? 'Campo requerido' : 'Debe ser mayor a 0'}
+                  </span>
+                )}
+              </div>
+
+              <div className="form-group">
+                <label>Descripción (opcional)</label>
+                <textarea
+                  name="descripcion"
+                  value={formData.descripcion}
+                  onChange={handleChange}
+                  rows="3"
+                  disabled={cargando}
+                  placeholder="Descripción del gasto"
+                />
+              </div>
+
+              <div className="form-actions">
+                <button 
+                  type="button" 
+                  onClick={handleCancelar}
+                  disabled={cargando}
+                  className="secondary-button"
+                >
+                  Cancelar
+                </button>
+                <button 
+                  type="submit" 
+                  disabled={cargando || categorias.length === 0}
+                  className="primary-button"
+                >
+                  {cargando ? 'Procesando...' : editandoGasto ? 'Actualizar' : 'Guardar'}
+                </button>
+              </div>
+            </form>
           </div>
         )}
+
+        <div className="historial-gastos">
+          <h3>Historial</h3>
+          
+          {cargando && gastos.length === 0 ? (
+            <div className="loading-message">Cargando gastos...</div>
+          ) : gastos.length === 0 ? (
+            <div className="empty-state">
+              <p>No hay gastos registrados</p>
+              {!mostrarFormulario && (
+                <button 
+                  className="primary-button"
+                  onClick={() => setMostrarFormulario(true)}
+                  style={{ marginTop: '1rem' }}
+                >
+                  Crear primer gasto
+                </button>
+              )}
+            </div>
+          ) : (
+            <div className="table-container">
+              <table className="gastos-table">
+                <thead>
+                  <tr>
+                    <th>Categoría</th>
+                    <th>Descripción</th>
+                    <th>Cantidad</th>
+                    <th>Fecha</th>
+                    {esAdmin && <th>Acciones</th>}
+                  </tr>
+                </thead>
+                <tbody>
+                  {gastos.map(gasto => {
+                    const categoria = categorias.find(c => c.id === gasto.idCategoria);
+                    return (
+                      <tr key={gasto.id}>
+                        <td>{categoria?.nombre || 'Sin categoría'}</td>
+                        <td>{gasto.descripcion || '-'}</td>
+                        <td>${gasto.cantidad.toFixed(2)}</td>
+                        <td>{new Date(gasto.fecha).toLocaleDateString()}</td>
+                        {esAdmin && (
+                          <td>
+                            <button 
+                              onClick={() => handleEditarGasto(gasto)}
+                              disabled={cargando}
+                              className="edit-button"
+                            >
+                              ✏️ Editar
+                            </button>
+                          </td>
+                        )}
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
       </div>
-    </div>
+
+      <ModalAsignarPorcentajes
+        abierto={modalAbierto}
+        onClose={() => setModalAbierto(false)}
+        miembros={miembros}
+        idEspacio={espacioActual?.idEspacio}
+        onSuccess={handleModalSuccess}
+      />
+    </>
   );
 };

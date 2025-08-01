@@ -71,7 +71,7 @@ public class MainSecurity {
         http.cors(Customizer.withDefaults()).csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(req ->
                         req.requestMatchers(WHITE_LIST).permitAll()
-                                .requestMatchers("/api/espacios/").hasAnyRole("Administrador")
+                                .requestMatchers("/api/espacios/").hasAnyRole("Administrador", "Invitado")
                                 .requestMatchers("/api/espacios/crear").hasAnyRole("Administrador")
                                 .requestMatchers("/api/usuarios-espacios/unirse").hasAnyRole("Administrador", "Invitado")
                                 .requestMatchers("/api/usuarios-espacios/change-role").hasAnyRole("Administrador")
@@ -93,7 +93,7 @@ public class MainSecurity {
                                 .requestMatchers("api/pagos/**").hasAnyRole("Administrador")
                                 .requestMatchers("/api/pagos/all/**").hasAnyRole("Administrador")
                                 .requestMatchers("/api/pagos/satus/**").hasAnyRole("Administrador")
-                                .requestMatchers("/api/usuarios-espacios/all/").hasAnyRole("Administrador")
+                                .requestMatchers("/api/usuarios-espacios/all/**").hasAnyRole("Administrador", "Invitado")
 
                                 .anyRequest().authenticated()
                 )
