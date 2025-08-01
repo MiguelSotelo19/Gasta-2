@@ -1,0 +1,30 @@
+package mx.edu.utez.gasta2.Controller.Pagos;
+
+import mx.edu.utez.gasta2.Config.ApiResponse;
+import mx.edu.utez.gasta2.Service.PagoService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+@RestController
+@RequestMapping("/api/pagos")
+public class PagosController {
+
+    @Autowired
+    private PagoService service;
+
+    @GetMapping("/all/{idEspacio}")
+    public ResponseEntity<ApiResponse> getAll(@PathVariable Long idEspacio){
+        return service.getAll(idEspacio);
+    }
+
+    @GetMapping("/{idUsuario}/{idEspacio}")
+    public ResponseEntity<ApiResponse> getOneByID(@PathVariable Long idUsuario, @PathVariable Long idEspacio){
+        return service.getOne(idUsuario,idEspacio);
+    }
+
+    @PatchMapping("status/{idPago}")
+    public ResponseEntity<ApiResponse> changeStatus(@PathVariable Long idPago){
+        return service.changeStatus(idPago);
+    }
+}

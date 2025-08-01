@@ -1,5 +1,7 @@
 package mx.edu.utez.gasta2.Model.Gastos.DTO;
 
+import mx.edu.utez.gasta2.Model.Pagos.PagoBean;
+
 import java.time.LocalDate;
 
 public class GastoDTO {
@@ -10,6 +12,7 @@ public class GastoDTO {
     private Long idCategoria;
     private Long idEspacio;
 
+    private PagoBean pago;
     public GastoDTO() {
     }
 
@@ -68,5 +71,13 @@ public class GastoDTO {
 
     public void setIdEspacio(Long idEspacio) {
         this.idEspacio = idEspacio;
+    }
+
+    public PagoBean getPago() {
+        return pago;
+    }
+
+    public void setPago(PagoBean pago) {
+        this.pago = pago;
     }
 }
