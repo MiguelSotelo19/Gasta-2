@@ -93,12 +93,13 @@ public class Usuarios_Espacios_Controller {
     }
 
     // Asiganar porcentajes
+    @CrossOrigin(origins = {"http://localhost:5173"}, allowCredentials = "true")
     @PutMapping("/asignar-porcentajes")
     public ResponseEntity<ApiResponse> asignarPorcentajes(@RequestBody PorcentajesRequestDTO request) {
         return service.asignarPorcentajesManuales(request);
     }
 
-    @GetMapping("all/{idEspacio}")
+    @GetMapping("/all/{idEspacio}")
     public ResponseEntity<ApiResponse> allBySpace(@PathVariable Long idEspacio){
         return service.allBySpace(idEspacio);
     }
