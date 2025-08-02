@@ -33,8 +33,8 @@ axiosInstance.interceptors.response.use(
       localStorage.removeItem("accessToken")
       //localStorage.removeItem("correo")
       //sessionStorage.removeItem("usuario")
-      window.location.href = "/"
-      //localStorage.removeItem("userId")
+      //window.location.href = "/"
+      localStorage.removeItem("userId")
     }
     return Promise.reject(error)
   },

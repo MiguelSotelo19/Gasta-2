@@ -17,11 +17,37 @@ export const Categorias = ({ espacioActual, nombreEspacio }) => {
   const [categoriaEditar, setCategoriaEditar] = useState(null);
   const [filtro, setFiltro] = useState("");
 
-  const fetchCategorias = async (idEspacio, showToast = true) => {
+  const getColoresCateg = (categoryName) => {
+    const colorPalette = [
+      '#10b981',
+      '#3b82f6',
+      '#8b5cf6',
+      '#f59e0b',
+      '#ef4444',
+      '#06b6d4',
+      '#6b7280'
+    ];
+
+    const firstLetter = categoryName?.charAt(0)?.toUpperCase();
+    const alphabetIndex = firstLetter ? firstLetter.charCodeAt(0) - 65 : 0;
+
+    const groupSize = Math.ceil(26 / colorPalette.length);
+    const colorIndex = Math.floor(alphabetIndex / groupSize);
+
+    return colorPalette[colorIndex] || colorPalette[colorPalette.length - 1];
+  };
+
+  const fetchCategorias = async (idEspacio) => {
     try {
       const response = await getCategoriesByEspacio(idEspacio);
-      setCategorias(Array.isArray(response.data) ? response.data : []);
-      if (showToast) toast.success("Categorías cargadas correctamente");
+      const categoriesData = Array.isArray(response.data) ? response.data : [];
+
+      const categoriasConEstilo = categoriesData.map(cat => ({
+        ...cat,
+        color: getColoresCateg(cat.nombre)
+      }));
+
+      setCategorias(categoriasConEstilo);
     } catch (error) {
       toast.error("Error al obtener las categorías");
       console.error(error);
@@ -33,7 +59,7 @@ export const Categorias = ({ espacioActual, nombreEspacio }) => {
       setCategorias([]);
       setCategoriaEditar(null);
       setModalAbierto(false);
-      fetchCategorias(espacioActual.idEspacio, true);
+      fetchCategorias(espacioActual.idEspacio);
     } else {
       setCategorias([]);
       setCategoriaEditar(null);
@@ -90,7 +116,7 @@ export const Categorias = ({ espacioActual, nombreEspacio }) => {
 
       setModalAbierto(false);
       setCategoriaEditar(null);
-      await fetchCategorias(espacioActual.idEspacio, false);
+      await fetchCategorias(espacioActual.idEspacio);
     } catch (error) {
       toast.error(
         categoriaEditar
@@ -150,34 +176,13 @@ export const Categorias = ({ espacioActual, nombreEspacio }) => {
           </button>
         </div>
 
-        {/* Input modificado */}
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "0.5rem",
-            marginTop: "1rem",
-            backgroundColor: "#f0f0f0",
-            padding: "0.4rem 0.8rem",
-            borderRadius: "8px",
-            maxWidth: "400px",
-          }}
-        >
+
+        <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginTop: "1rem", backgroundColor: "#f0f0f0", padding: "0.4rem 0.8rem", borderRadius: "8px", maxWidth: "400px", }} >
           <span role="img" aria-label="lupa" style={{ fontSize: "1.2rem" }}>
             🔍
           </span>
-          <input
-            type="text"
-            placeholder="Buscar categoría..."
-            value={filtro}
-            onChange={(e) => setFiltro(e.target.value)}
-            style={{
-              border: "none",
-              outline: "none",
-              backgroundColor: "transparent",
-              flex: 1,
-              fontSize: "1rem",
-            }}
+          <input type="text" placeholder="Buscar categoría..." value={filtro} onChange={(e) => setFiltro(e.target.value)}
+            style={{ border: "none", outline: "none", backgroundColor: "transparent", flex: 1, fontSize: "1rem", }}
           />
         </div>
 
@@ -188,15 +193,10 @@ export const Categorias = ({ espacioActual, nombreEspacio }) => {
             </div>
           ) : (
             categorias
-              .filter(
-                (cat) =>
-                  cat.id !== undefined &&
-                  cat.id !== null &&
-                  cat.nombre?.toLowerCase().includes(filtro.toLowerCase())
-              )
+              .filter((cat) => cat.id !== undefined && cat.id !== null && cat.nombre?.toLowerCase().includes(filtro.toLowerCase()))
               .map((categoria) => (
                 <div className="member-item" key={categoria.id}>
-                  <div className="member-avatar">
+                  <div className="gasto-category-card-icon" style={{ backgroundColor: (categoria.color || "#6b7280") + "20", color: categoria.color || "#6b7280", border: `2px solid ${categoria.color || "#6b7280"}40` }}>
                     {(categoria.nombre || "?").charAt(0).toUpperCase()}
                   </div>
                   <div className="member-details">
@@ -205,9 +205,7 @@ export const Categorias = ({ espacioActual, nombreEspacio }) => {
 
                   {espacioActual?.rol === "Administrador" && (
                     <div className="member-actions">
-                      <button
-                        className="small-button primary"
-                        onClick={() => handleEditarCategoria(categoria)}
+                      <button className="small-button primary" onClick={() => handleEditarCategoria(categoria)}
                         title="Editar categoría"
                       >
                         ✏️
