@@ -519,7 +519,7 @@ export const Gastos = ({ espacioActual, nombreEspacio }) => {
       <div className="gasto-list-container">
         {cargando ? (
           <div className="gasto-loading">Cargando pagos...</div>
-        ) : gastosDelUsuarioFiltrados.length > 0 ? ( 
+        ) : gastosDelUsuarioFiltrados.length > 0 ? (
           <div className="gasto-list">
             {gastosDelUsuarioFiltrados.map((gasto, index) => {
               const categoria = categorias.find(cat => cat.id === gasto.idTipoGasto);
