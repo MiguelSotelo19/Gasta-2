@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
+@CrossOrigin(origins = {"*"})
 @RequestMapping("/api/pagos")
 public class PagosController {
 
@@ -23,7 +24,7 @@ public class PagosController {
         return service.getOne(idUsuario,idEspacio);
     }
 
-    @PatchMapping("status/{idPago}")
+    @PatchMapping("/status/{idPago}")
     public ResponseEntity<ApiResponse> changeStatus(@PathVariable Long idPago){
         return service.changeStatus(idPago);
     }

@@ -77,8 +77,9 @@ export const Hub = () => {
 
     const getUser = async () => {
         try {
+            console.log("entra get, antes de await")
             const respuesta = await axiosInstance(urlUser)
-
+            console.log("dentro del get:", respuesta.data.data)
             const usuarioEncontrado = respuesta.data.data.find((u) => u.id === parseInt(userId));
 
             setUsuario(usuarioEncontrado);

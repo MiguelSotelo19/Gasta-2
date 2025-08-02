@@ -4,7 +4,6 @@ const baseURL = import.meta.env.VITE_API_URL
 
 const axiosInstance = axios.create({
   baseURL: baseURL,
-  withCredentials: true,
   timeout: 15000,
   headers: {
     "Content-Type": "application/json",
@@ -34,8 +33,8 @@ axiosInstance.interceptors.response.use(
       localStorage.removeItem("accessToken")
       //localStorage.removeItem("correo")
       //sessionStorage.removeItem("usuario")
-      window.location.href = "/"
-      //localStorage.removeItem("userId")
+      //window.location.href = "/"
+      localStorage.removeItem("userId")
     }
     return Promise.reject(error)
   },
