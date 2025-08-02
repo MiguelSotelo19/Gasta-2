@@ -62,7 +62,7 @@ export const Gastos = ({ espacioActual, nombreEspacio }) => {
         cargarPagos()
       ]);
     } catch (error) {
-      console.error("Error cargando datos iniciales:", error);
+      toast.error("Error cargando datos iniciales");
     }
   };
 
@@ -72,7 +72,7 @@ export const Gastos = ({ espacioActual, nombreEspacio }) => {
       const response = await axiosInstance.get(`${API_URL}/api/usuarios-espacios/all/${espacioActual.idEspacio}`);
       setMiembros(response.data.data || []);
     } catch (error) {
-      console.error("Error cargando miembros:", error);
+      toast.error("Error cargando miembros");
       setMiembros([]);
     }
   };
@@ -85,14 +85,12 @@ export const Gastos = ({ espacioActual, nombreEspacio }) => {
     setCargando(true);
     try {
       const url = `${urlPagos}${idUsuario}/${idEspacio}`;
-
       const response = await axiosInstance.get(url);
-      console.log("pagos:", pagos)
+
       if (response.data && response.data.data && Array.isArray(response.data.data)) {
         setPagos(response.data.data);
       } else {
-        console.error("Estructura de datos inesperada en pagos:", response.data);
-        toast.error("Error al cargar pagos");
+        toast.error("Error al cargar pagos - estructura de datos inesperada");
         setPagos([]);
       }
     } catch (error) {
@@ -127,7 +125,6 @@ export const Gastos = ({ espacioActual, nombreEspacio }) => {
         setCategorias([]);
       }
     } catch (error) {
-      console.error("Error cargando categorías:", error);
       toast.error("Error al cargar categorías");
       setCategorias([]);
     } finally {
@@ -141,7 +138,6 @@ export const Gastos = ({ espacioActual, nombreEspacio }) => {
     try {
       const response = await axiosInstance.get(urlGastos);
       if (response.data && Array.isArray(response.data.data)) {
-        console.log("gastos:", response.data.data)
         setGastos(response.data.data);
       } else {
         toast.error("Error al cargar gastos");
@@ -250,15 +246,6 @@ export const Gastos = ({ espacioActual, nombreEspacio }) => {
           idUsuario: idUsuario
         };
 
-        console.log("Datos para procesamiento:", {
-          gastoId: editandoGasto?.idGasto || null,
-          payload: payload,
-          esAdmin: esAdmin,
-          idUsuario: idUsuario,
-          idEspacio: espacioActual.idEspacio,
-          esEdicion: !!editandoGasto
-        });
-
         if (editandoGasto && !esAdmin) {
           toast.error("Solo los administradores pueden editar gastos");
           return;
@@ -276,7 +263,6 @@ export const Gastos = ({ espacioActual, nombreEspacio }) => {
         await cargarGastos();
         await cargarPagos();
       } catch (error) {
-        console.error("Error detallado:", error);
         toast.error("Error al procesar la solicitud");
       } finally {
         setCargando(false);
@@ -294,7 +280,6 @@ export const Gastos = ({ espacioActual, nombreEspacio }) => {
   };
 
   const handleEditGasto = (gasto) => {
-    console.log("entró handleEditGasto", gasto)
     setEditandoGasto(gasto);
     setAmount(gasto.cantidad?.toString() || gasto.monto?.toString() || "");
     setDescription(gasto.descripcion);
@@ -308,63 +293,68 @@ export const Gastos = ({ espacioActual, nombreEspacio }) => {
   };
 
   const handleCloseCompleteModal = () => {
-    setShowCompleteModal(false)
-    setSelectedMember(null)
-  }
+    setShowCompleteModal(false);
+    setSelectedMember(null);
+  };
 
   const gastosPorMiembro = (miembroId) => {
     return gastos.filter(gasto => gasto.idUsuario === miembroId);
   };
 
   const obtenerMiembrosConGastos = async () => {
-    const miembrosConPagos = await Promise.all(
-      miembros.map(async (miembro) => {
-        if (miembro.id === idUsuario) return null;
+    try {
+      const miembrosConPagos = await Promise.all(
+        miembros.map(async (miembro) => {
+          if (miembro.id === idUsuario) return null;
 
-        try {
-          const response = await axiosInstance.get(`${urlPagos}${miembro.id}/${idEspacio}`);
-          const pagosData = response.data?.data ?? [];
+          try {
+            const response = await axiosInstance.get(`${urlPagos}${miembro.id}/${idEspacio}`);
+            const pagosData = response.data?.data ?? [];
 
-          const gastosPendientes = gastosPorMiembro(miembro.id).filter(gasto => {
-            const pago = pagosData.find(p => Number(p.idGasto) === Number(gasto.idGasto));
-            return !pago || !pago.estatus;
-          });
+            const gastosPendientes = gastosPorMiembro(miembro.id).filter(gasto => {
+              const pago = pagosData.find(p => Number(p.idGasto) === Number(gasto.idGasto));
+              return !pago || !pago.estatus;
+            });
 
-          return {
-            id: miembro.id,
-            name: miembro.nombreusuario,
-            avatar: miembro.nombreusuario.charAt(0).toUpperCase(),
-            gastosPendientes: gastosPendientes.map(gasto => {
-              const categoria = categorias.find(cat => cat.id === gasto.idTipoGasto);
-              const pagoCorrespondiente = pagosData.find(p => Number(p.idGasto) === Number(gasto.idGasto));
-              return {
-                id: gasto.idGasto,
-                description: gasto.descripcion,
-                amount: pagoCorrespondiente
-                  ? parseFloat(pagoCorrespondiente.monto || 0)
-                  : parseFloat(gasto.monto || gasto.cantidad || 0),
-                category: categoria?.nombre || 'Sin categoría',
-                color: categoria?.color || '#6b7280',
-                icon: categoria?.nombre?.charAt(0)?.toUpperCase() || '?',
-                dueDate: gasto.fecha ? new Date(gasto.fecha).toLocaleDateString() : 'Sin fecha',
-                idCategoria: gasto.idTipoGasto,
-                pagoId: pagoCorrespondiente?.id || null
-              };
-            })
-          };
-        } catch (error) {
-          console.error(`Error cargando pagos del miembro ${miembro.id}:`, error);
-          return {
-            id: miembro.id,
-            name: miembro.nombreusuario,
-            avatar: miembro.nombreusuario.charAt(0).toUpperCase(),
-            gastosPendientes: []
-          };
-        }
-      })
-    );
+            return {
+              id: miembro.id,
+              name: miembro.nombreusuario,
+              avatar: miembro.nombreusuario.charAt(0).toUpperCase(),
+              gastosPendientes: gastosPendientes.map(gasto => {
+                const categoria = categorias.find(cat => cat.id === gasto.idTipoGasto);
+                const pagoCorrespondiente = pagosData.find(p => Number(p.idGasto) === Number(gasto.idGasto));
+                return {
+                  id: gasto.idGasto,
+                  description: gasto.descripcion,
+                  amount: pagoCorrespondiente
+                    ? parseFloat(pagoCorrespondiente.monto || 0)
+                    : parseFloat(gasto.monto || gasto.cantidad || 0),
+                  category: categoria?.nombre || 'Sin categoría',
+                  color: categoria?.color || '#6b7280',
+                  icon: categoria?.nombre?.charAt(0)?.toUpperCase() || '?',
+                  dueDate: gasto.fecha ? new Date(gasto.fecha).toLocaleDateString() : 'Sin fecha',
+                  idCategoria: gasto.idTipoGasto,
+                  pagoId: pagoCorrespondiente?.id || null
+                };
+              })
+            };
+          } catch (error) {
+            toast.error(`Error cargando pagos del miembro ${miembro.nombreusuario}`);
+            return {
+              id: miembro.id,
+              name: miembro.nombreusuario,
+              avatar: miembro.nombreusuario.charAt(0).toUpperCase(),
+              gastosPendientes: []
+            };
+          }
+        })
+      );
 
-    return miembrosConPagos.filter(miembro => miembro !== null);
+      return miembrosConPagos.filter(miembro => miembro !== null);
+    } catch (error) {
+      toast.error("Error obteniendo miembros con gastos");
+      return [];
+    }
   };
 
   const gastosDelUsuario = gastos.filter(gasto => {
@@ -408,9 +398,9 @@ export const Gastos = ({ espacioActual, nombreEspacio }) => {
         avatar: member.avatar,
         gastosPendientes
       });
+      toast.success(`Datos de ${member.name} cargados correctamente`);
     } catch (error) {
-      console.error("Error cargando pagos del miembro:", error);
-      toast.error("No se pudieron cargar los pagos del miembro.");
+      toast.error("No se pudieron cargar los pagos del miembro");
     } finally {
       setCargando(false);
     }
@@ -423,19 +413,17 @@ export const Gastos = ({ espacioActual, nombreEspacio }) => {
     }
 
     const url = urlPagosStatus + pagoId;
-    console.log(`Marcando pago ${pagoId} como completado`);
-
     setCargando(true);
     try {
       const response = await axiosInstance.patch(url);
-      console.log("respuesta cambio status:", response);
       if (response.data.status == "OK") {
         toast.success("Se ha marcado el pago como completado");
         await cargarGastos();
         await cargarPagos();
+      } else {
+        toast.error("Error al completar el pago");
       }
-    } catch (e) {
-      console.log(e);
+    } catch (error) {
       toast.error("Error al completar el pago");
     } finally {
       setCargando(false);
@@ -443,21 +431,20 @@ export const Gastos = ({ espacioActual, nombreEspacio }) => {
   };
 
   const completarPagoMiembro = async (expenseId) => {
-    const url = urlPagosStatus + expenseId
-    console.log(`Marcando gasto ${expenseId} del miembro como pagado`);
+    const url = urlPagosStatus + expenseId;
 
     try {
-      const response = await axiosInstance.patch(url)
-      console.log("respuesta cambio status:", response)
+      const response = await axiosInstance.patch(url);
       if (response.data.status == "OK") {
         toast.success("Se ha marcado el pago como completado");
-        handleCloseCompleteModal()
+        handleCloseCompleteModal();
         cargarDatosIniciales();
+      } else {
+        toast.error("Error al completar el pago del miembro");
       }
-    } catch (e) {
-      console.log(e)
+    } catch (error) {
+      toast.error("Error al completar el pago del miembro");
     }
-
   };
 
   useEffect(() => {
@@ -468,8 +455,8 @@ export const Gastos = ({ espacioActual, nombreEspacio }) => {
       try {
         const miembrosData = await obtenerMiembrosConGastos();
         setSpaceMembers(miembrosData);
-      } catch (e) {
-        console.error("Error cargando miembros con gastos:", e);
+      } catch (error) {
+        toast.error("Error cargando miembros con gastos");
       } finally {
         setCargando(false);
       }
