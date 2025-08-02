@@ -1,15 +1,16 @@
-// Importaciones necesarias
 import { useState, useEffect } from "react";
 import axiosInstance from "../services/axiosInstance";
 import { toast } from "react-toastify";
 import { getCategoriesByEspacio } from "../services/categoryService";
 import "./css/general.css";
 import "./css/gastos.css";
+import axios from "axios";
 
 export const Gastos = ({ espacioActual, nombreEspacio }) => {
   const API_URL = import.meta.env.VITE_API_URL;
   const urlGastos = `${API_URL}/api/gastos/espacio/${espacioActual?.idEspacio}`;
   const urlPagos = `${API_URL}/api/pagos/` //ocupa idUsuario/idEspacio
+  const urlPagosStatus = `${API_URL}/api/pagos/status/`
   const [gastos, setGastos] = useState([]);
   const [categorias, setCategorias] = useState([]);
   const [miembros, setMiembros] = useState([]);
@@ -20,11 +21,17 @@ export const Gastos = ({ espacioActual, nombreEspacio }) => {
   const idEspacio = espacioActual?.idEspacio || null;
   const idUsuario = parseInt(localStorage.getItem("userId")) || null;
   const [showModal, setShowModal] = useState(false);
+  const [showCompleteModal, setShowCompleteModal] = useState(false)
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [amount, setAmount] = useState("");
   const [description, setDescription] = useState("");
   const [errors, setErrors] = useState({});
   const [pagos, setPagos] = useState([]);
+  const [selectedMember, setSelectedMember] = useState(null);
+  const [pagosInvitado, setPagoInvitado] = useState([])
+  const [spaceMembers, setSpaceMembers] = useState([]);
+  const [soloNoPagados, setSoloNoPagados] = useState(false);
+
 
   const [formData, setFormData] = useState({
     cantidad: '',
@@ -72,23 +79,16 @@ export const Gastos = ({ espacioActual, nombreEspacio }) => {
 
   const cargarPagos = async () => {
     if (!espacioActual?.idEspacio || !idUsuario) {
-      console.log("No se pueden cargar pagos - falta espacioActual o idUsuario");
       return;
     }
 
     setCargando(true);
     try {
-      const url = `${API_URL}/api/pagos/${idUsuario}/${idEspacio}`;
-      console.log("URL de pagos:", url);
-      console.log("idUsuario:", idUsuario);
-      console.log("idEspacio:", idEspacio);
+      const url = `${urlPagos}${idUsuario}/${idEspacio}`;
 
       const response = await axiosInstance.get(url);
-      console.log("Response completo de pagos:", response);
-      console.log("Response.data de pagos:", response.data);
-
+      console.log("pagos:", pagos)
       if (response.data && response.data.data && Array.isArray(response.data.data)) {
-        console.log("Pagos cargados exitosamente:", response.data.data);
         setPagos(response.data.data);
       } else {
         console.error("Estructura de datos inesperada en pagos:", response.data);
@@ -96,9 +96,6 @@ export const Gastos = ({ espacioActual, nombreEspacio }) => {
         setPagos([]);
       }
     } catch (error) {
-      console.error("Error completo cargando pagos:", error);
-      console.error("Error response:", error.response);
-      console.error("Error message:", error.message);
       toast.error("Error al cargar los pagos. Verifica tu conexión.");
       setPagos([]);
     } finally {
@@ -122,12 +119,10 @@ export const Gastos = ({ espacioActual, nombreEspacio }) => {
       if (categoriesData) {
         const categoriasConEstilo = categoriesData.map(cat => ({
           ...cat,
-          color: getCategoryColor(cat.nombre)
+          color: getColoresCateg(cat.nombre)
         }));
-        console.log("Categorías procesadas:", categoriasConEstilo);
         setCategorias(categoriasConEstilo);
       } else {
-        console.error("No se pudieron cargar las categorías, estructura inesperada:", response);
         toast.error("Error al cargar categorías");
         setCategorias([]);
       }
@@ -160,7 +155,7 @@ export const Gastos = ({ espacioActual, nombreEspacio }) => {
     }
   };
 
-  const getCategoryColor = (categoryName) => {
+  const getColoresCateg = (categoryName) => {
     const colorPalette = [
       '#10b981',
       '#3b82f6',
@@ -180,7 +175,7 @@ export const Gastos = ({ espacioActual, nombreEspacio }) => {
     return colorPalette[colorIndex] || colorPalette[colorPalette.length - 1];
   };
 
-  const validateAmount = (value) => {
+  const validarMonto = (value) => {
     if (!value) return "El monto es requerido";
     if (isNaN(value)) return "Debe ser un número válido";
 
@@ -196,31 +191,31 @@ export const Gastos = ({ espacioActual, nombreEspacio }) => {
     return null;
   };
 
-  const validateDescription = (value) => {
+  const validarDescripcion = (value) => {
     if (!value) return "La descripción es requerida";
     if (value.length < 5) return "La descripción debe tener al menos 5 caracteres";
     if (value.length > 100) return "La descripción no puede exceder 100 caracteres";
     return null;
   };
 
-  const handleAmountChange = (e) => {
+  const handleCambioMonto = (e) => {
     const value = e.target.value;
     const regex = /^\d*\.?\d*$/;
     if (regex.test(value) || value === "") {
       setAmount(value);
-      const error = validateAmount(value);
+      const error = validarMonto(value);
       setErrors((prev) => ({ ...prev, amount: error }));
     }
   };
 
-  const handleDescriptionChange = (e) => {
+  const handleCambioDescripc = (e) => {
     const value = e.target.value;
     setDescription(value);
-    const error = validateDescription(value);
+    const error = validarDescripcion(value);
     setErrors((prev) => ({ ...prev, description: error }));
   };
 
-  const handleCategorySelect = (category) => {
+  const handleSeleccCateg = (category) => {
     setSelectedCategory(category);
     setErrors((prev) => ({ ...prev, category: null }));
   };
@@ -232,12 +227,12 @@ export const Gastos = ({ espacioActual, nombreEspacio }) => {
       newErrors.category = "Debe seleccionar una categoría";
     }
 
-    const amountError = validateAmount(amount);
+    const amountError = validarMonto(amount);
     if (amountError) {
       newErrors.amount = amountError;
     }
 
-    const descriptionError = validateDescription(description);
+    const descriptionError = validarDescripcion(description);
     if (descriptionError) {
       newErrors.description = descriptionError;
     }
@@ -251,11 +246,26 @@ export const Gastos = ({ espacioActual, nombreEspacio }) => {
           cantidad: parseFloat(amount),
           descripcion: description,
           idCategoria: parseInt(selectedCategory.id),
-          idEspacio: parseInt(espacioActual.idEspacio)
+          idEspacio: parseInt(espacioActual.idEspacio),
+          idUsuario: idUsuario
         };
 
+        console.log("Datos para procesamiento:", {
+          gastoId: editandoGasto?.idGasto || null,
+          payload: payload,
+          esAdmin: esAdmin,
+          idUsuario: idUsuario,
+          idEspacio: espacioActual.idEspacio,
+          esEdicion: !!editandoGasto
+        });
+
+        if (editandoGasto && !esAdmin) {
+          toast.error("Solo los administradores pueden editar gastos");
+          return;
+        }
+
         if (editandoGasto) {
-          await axiosInstance.put(`${API_URL}/api/gastos/editar/${editandoGasto.id}`, payload);
+          await axiosInstance.put(`${API_URL}/api/gastos/editar/${editandoGasto.idGasto}`, payload);
           toast.success("Gasto actualizado correctamente");
         } else {
           await axiosInstance.post(`${API_URL}/api/gastos/registrar`, payload);
@@ -266,6 +276,7 @@ export const Gastos = ({ espacioActual, nombreEspacio }) => {
         await cargarGastos();
         await cargarPagos();
       } catch (error) {
+        console.error("Error detallado:", error);
         toast.error("Error al procesar la solicitud");
       } finally {
         setCargando(false);
@@ -283,12 +294,12 @@ export const Gastos = ({ espacioActual, nombreEspacio }) => {
   };
 
   const handleEditGasto = (gasto) => {
+    console.log("entró handleEditGasto", gasto)
     setEditandoGasto(gasto);
-    setAmount(gasto.cantidad.toString());
+    setAmount(gasto.cantidad?.toString() || gasto.monto?.toString() || "");
     setDescription(gasto.descripcion);
 
-    // Buscar la categoría correspondiente
-    const categoria = categorias.find(cat => cat.id === gasto.idCategoria);
+    const categoria = categorias.find(cat => cat.id === gasto.idTipoGasto);
     if (categoria) {
       setSelectedCategory(categoria);
     }
@@ -296,22 +307,184 @@ export const Gastos = ({ espacioActual, nombreEspacio }) => {
     setShowModal(true);
   };
 
-  const handleDeleteGasto = async (gastoId) => {
-    if (window.confirm("¿Estás seguro de que deseas eliminar este gasto?")) {
-      setCargando(true);
-      try {
-        await axiosInstance.delete(`${API_URL}/api/gastos/eliminar/${gastoId}`);
-        toast.success("Gasto eliminado correctamente");
-        await cargarGastos();
-      } catch (error) {
-        toast.error("Error al eliminar el gasto");
-      } finally {
-        setCargando(false);
-      }
+  const handleCloseCompleteModal = () => {
+    setShowCompleteModal(false)
+    setSelectedMember(null)
+  }
+
+  const gastosPorMiembro = (miembroId) => {
+    return gastos.filter(gasto => gasto.idUsuario === miembroId);
+  };
+
+  const obtenerMiembrosConGastos = async () => {
+    const miembrosConPagos = await Promise.all(
+      miembros.map(async (miembro) => {
+        if (miembro.id === idUsuario) return null;
+
+        try {
+          const response = await axiosInstance.get(`${urlPagos}${miembro.id}/${idEspacio}`);
+          const pagosData = response.data?.data ?? [];
+
+          const gastosPendientes = gastosPorMiembro(miembro.id).filter(gasto => {
+            const pago = pagosData.find(p => Number(p.idGasto) === Number(gasto.idGasto));
+            return !pago || !pago.estatus;
+          });
+
+          return {
+            id: miembro.id,
+            name: miembro.nombreusuario,
+            avatar: miembro.nombreusuario.charAt(0).toUpperCase(),
+            gastosPendientes: gastosPendientes.map(gasto => {
+              const categoria = categorias.find(cat => cat.id === gasto.idTipoGasto);
+              const pagoCorrespondiente = pagosData.find(p => Number(p.idGasto) === Number(gasto.idGasto));
+              return {
+                id: gasto.idGasto,
+                description: gasto.descripcion,
+                amount: pagoCorrespondiente
+                  ? parseFloat(pagoCorrespondiente.monto || 0)
+                  : parseFloat(gasto.monto || gasto.cantidad || 0),
+                category: categoria?.nombre || 'Sin categoría',
+                color: categoria?.color || '#6b7280',
+                icon: categoria?.nombre?.charAt(0)?.toUpperCase() || '?',
+                dueDate: gasto.fecha ? new Date(gasto.fecha).toLocaleDateString() : 'Sin fecha',
+                idCategoria: gasto.idTipoGasto,
+                pagoId: pagoCorrespondiente?.id || null
+              };
+            })
+          };
+        } catch (error) {
+          console.error(`Error cargando pagos del miembro ${miembro.id}:`, error);
+          return {
+            id: miembro.id,
+            name: miembro.nombreusuario,
+            avatar: miembro.nombreusuario.charAt(0).toUpperCase(),
+            gastosPendientes: []
+          };
+        }
+      })
+    );
+
+    return miembrosConPagos.filter(miembro => miembro !== null);
+  };
+
+  const gastosDelUsuario = gastos.filter(gasto => {
+    const pago = pagos.find(p => Number(p.idGasto) === Number(gasto.idGasto));
+    return gasto.idUsuario == idUsuario;
+  });
+
+  const handleMiembroSelecc = async (member) => {
+    setCargando(true);
+    try {
+      const response = await axiosInstance.get(`${urlPagos}${member.id}/${idEspacio}`);
+      const pagosData = response.data?.data ?? [];
+
+      const gastosPendientes = gastosPorMiembro(member.id)
+        .filter(gasto => {
+          const pago = pagosData.find(p => Number(p.idGasto) === Number(gasto.idGasto));
+          return !pago || !pago.estatus;
+        })
+        .map(gasto => {
+          const categoria = categorias.find(cat => cat.id === gasto.idTipoGasto);
+          const pagoCorrespondiente = pagosData.find(p => Number(p.idGasto) === Number(gasto.idGasto));
+          return {
+            id: gasto.idGasto,
+            description: gasto.descripcion,
+            amount: pagoCorrespondiente
+              ? parseFloat(pagoCorrespondiente.monto || 0)
+              : parseFloat(gasto.monto || gasto.cantidad || 0),
+            category: categoria?.nombre || 'Sin categoría',
+            color: categoria?.color || '#6b7280',
+            icon: categoria?.nombre?.charAt(0)?.toUpperCase() || '?',
+            dueDate: gasto.fecha ? new Date(gasto.fecha).toLocaleDateString() : 'Sin fecha',
+            idCategoria: gasto.idTipoGasto,
+            pagoId: pagoCorrespondiente?.id || null
+          };
+        });
+
+      setPagoInvitado(pagosData);
+      setSelectedMember({
+        id: member.id,
+        name: member.name,
+        avatar: member.avatar,
+        gastosPendientes
+      });
+    } catch (error) {
+      console.error("Error cargando pagos del miembro:", error);
+      toast.error("No se pudieron cargar los pagos del miembro.");
+    } finally {
+      setCargando(false);
     }
   };
 
-  const gastosDelUsuario = gastos.filter(gasto => gasto.idUsuario == idUsuario && gasto.estatusPago == false);
+  const marcarComoPagado = async (pagoId) => {
+    if (!pagoId) {
+      toast.error("No se pudo encontrar el ID del pago");
+      return;
+    }
+
+    const url = urlPagosStatus + pagoId;
+    console.log(`Marcando pago ${pagoId} como completado`);
+
+    setCargando(true);
+    try {
+      const response = await axiosInstance.patch(url);
+      console.log("respuesta cambio status:", response);
+      if (response.data.status == "OK") {
+        toast.success("Se ha marcado el pago como completado");
+        await cargarGastos();
+        await cargarPagos();
+      }
+    } catch (e) {
+      console.log(e);
+      toast.error("Error al completar el pago");
+    } finally {
+      setCargando(false);
+    }
+  };
+
+  const completarPagoMiembro = async (expenseId) => {
+    const url = urlPagosStatus + expenseId
+    console.log(`Marcando gasto ${expenseId} del miembro como pagado`);
+
+    try {
+      const response = await axiosInstance.patch(url)
+      console.log("respuesta cambio status:", response)
+      if (response.data.status == "OK") {
+        toast.success("Se ha marcado el pago como completado");
+        handleCloseCompleteModal()
+        cargarDatosIniciales();
+      }
+    } catch (e) {
+      console.log(e)
+    }
+
+  };
+
+  useEffect(() => {
+    if (!showCompleteModal) return;
+
+    const cargarMiembrosConGastos = async () => {
+      setCargando(true);
+      try {
+        const miembrosData = await obtenerMiembrosConGastos();
+        setSpaceMembers(miembrosData);
+      } catch (e) {
+        console.error("Error cargando miembros con gastos:", e);
+      } finally {
+        setCargando(false);
+      }
+    };
+
+    cargarMiembrosConGastos();
+  }, [showCompleteModal, miembros, gastos, categorias]);
+
+  const gastosDelUsuarioFiltrados = gastosDelUsuario.filter(gasto => {
+    if (!soloNoPagados) return true;
+
+    const pago = pagos.find(p => Number(p.idGasto) === Number(gasto.idGasto));
+    return !pago?.estatus;
+  });
+
   return (
     <div className="gasto-container">
       <div className="gasto-header">
@@ -319,32 +492,46 @@ export const Gastos = ({ espacioActual, nombreEspacio }) => {
           <h1>Gastos</h1>
           <p>Gestiona los gastos del espacio: {nombreEspacio}</p>
         </div>
-        <button
-          className="gasto-add-button"
-          onClick={() => setShowModal(true)}
-          disabled={cargando || cargandoCategorias}
-        >
-          <span>+</span>
-          Agregar Gasto
-        </button>
+        <div className="gasto-header-actions">
+          {esAdmin && (
+            <>
+              <label className="gasto-filter-checkbox">
+                <input
+                  type="checkbox"
+                  checked={soloNoPagados}
+                  onChange={(e) => setSoloNoPagados(e.target.checked)}
+                />
+                <span className="gasto-checkbox-text">Solo no pagados</span>
+              </label>
+              <button className="gasto-complete-button" onClick={() => setShowCompleteModal(true)}>
+                <span>✅</span>
+                Completar Gastos
+              </button>
+            </>
+          )}
+          <button className="gasto-add-button" onClick={() => setShowModal(true)}>
+            <span>+</span>
+            Agregar Gasto
+          </button>
+        </div>
       </div>
 
       <div className="gasto-list-container">
         {cargando ? (
           <div className="gasto-loading">Cargando pagos...</div>
-        ) : gastosDelUsuario.length > 0 ? (
+        ) : gastosDelUsuarioFiltrados.length > 0 ? ( 
           <div className="gasto-list">
-            {gastosDelUsuario.map((gasto, index) => {
+            {gastosDelUsuarioFiltrados.map((gasto, index) => {
               const categoria = categorias.find(cat => cat.id === gasto.idTipoGasto);
-              const pago = pagos[index];
+              const pago = pagos.find(p => Number(p.idGasto) === Number(gasto.idGasto));
 
               return (
-                <div key={gasto.id} className="gasto-item">
+                <div key={gasto.id || index} className="gasto-item">
                   <div className="gasto-item-left">
                     <div
                       className="gasto-category-icon"
                       style={{
-                        backgroundColor: categoria?.color + "20" || "#6b728020",
+                        backgroundColor: (categoria?.color || "#6b7280") + "20",
                         color: categoria?.color || "#6b7280"
                       }}
                     >
@@ -371,32 +558,50 @@ export const Gastos = ({ espacioActual, nombreEspacio }) => {
                       ${Number(pago?.monto || 0).toLocaleString('es-MX', { minimumFractionDigits: 2 })}
                     </div>
                     <div className="gasto-item-actions">
-                      {esAdmin ? (
-                        <>
-                      {!gasto.estatus ? (
-                        <button
-                          className="gasto-pay-button"
-                          onClick={() => marcarComoPagado(gasto.id)}
-                          disabled={cargando}
-                        >
-                          Marcar como Pagado
-                        </button>
-                      ) : (
-                        <span className="gasto-paid-status">✅ Pagado</span>
+                      {esAdmin && (
+                        !pago?.estatus ? (
+                          <div className="acciones-horizontal">
+                            <button
+                              className="gasto-pay-button"
+                              onClick={() => marcarComoPagado(pago?.id)}
+                              disabled={cargando || !pago?.id}
+                            >
+                              Marcar como Pagado
+                            </button>
+                            <button className="small-button edit"
+                              onClick={() => handleEditGasto(gasto)}
+                            >
+                              ✏️
+                            </button>
+                          </div>
+                        ) : (
+                          <div className="acciones-horizontal">
+                            <span className="gasto-paid-status">✅ Pagado</span>
+                            <button className="small-button edit"
+                              onClick={() => handleEditGasto(gasto)}
+                            >
+                              ✏️
+                            </button>
+                          </div>
+                        )
                       )}
-                      </>) : ""}
-                      
                     </div>
                   </div>
                 </div>
               );
             })}
           </div>
+        ) : soloNoPagados ? (
+          <div className="gasto-empty-state">
+            <div className="gasto-empty-icon">✅</div>
+            <h3 className="gasto-empty-title">¡Todos pagados!</h3>
+            <p className="gasto-empty-message">No tienes pagos pendientes por realizar</p>
+          </div>
         ) : (
           <div className="gasto-empty-state">
             <div className="gasto-empty-icon">✅</div>
             <h3 className="gasto-empty-title">¡Excelente!</h3>
-            <p className="gasto-empty-message">No tienes pagos pendientes por realizar</p>
+            <p className="gasto-empty-message">No tienes gastos registrados</p>
           </div>
         )}
       </div>
@@ -415,7 +620,6 @@ export const Gastos = ({ espacioActual, nombreEspacio }) => {
 
             <div className="gasto-modal-content">
               {!selectedCategory ? (
-                // Paso 1: Seleccionar categoría
                 <div className="gasto-category-selection">
                   <h3 className="gasto-step-title">Selecciona una categoría</h3>
                   {errors.category && <div className="gasto-error-message">{errors.category}</div>}
@@ -427,7 +631,7 @@ export const Gastos = ({ espacioActual, nombreEspacio }) => {
                         <button
                           key={category.id}
                           className="gasto-category-card"
-                          onClick={() => handleCategorySelect(category)}
+                          onClick={() => handleSeleccCateg(category)}
                           style={{ borderColor: category.color + "40" }}
                         >
                           <div
@@ -443,7 +647,6 @@ export const Gastos = ({ espacioActual, nombreEspacio }) => {
                   )}
                 </div>
               ) : (
-                // Paso 2: Ingresar detalles
                 <div className="gasto-details-form">
                   <div className="gasto-selected-category">
                     <div
@@ -467,7 +670,7 @@ export const Gastos = ({ espacioActual, nombreEspacio }) => {
                         className={`gasto-amount-input ${errors.amount ? "gasto-input-error" : ""}`}
                         placeholder="0.00"
                         value={amount}
-                        onChange={handleAmountChange}
+                        onChange={handleCambioMonto}
                       />
                     </div>
                     {errors.amount && <div className="gasto-error-message">{errors.amount}</div>}
@@ -479,7 +682,7 @@ export const Gastos = ({ espacioActual, nombreEspacio }) => {
                       className={`gasto-description-input ${errors.description ? "gasto-input-error" : ""}`}
                       placeholder="Describe el gasto (mínimo 5 caracteres)"
                       value={description}
-                      onChange={handleDescriptionChange}
+                      onChange={handleCambioDescripc}
                       rows={3}
                     />
                     <div className="gasto-character-count">{description.length}/100 caracteres</div>
@@ -498,6 +701,131 @@ export const Gastos = ({ espacioActual, nombreEspacio }) => {
                       {cargando ? 'Procesando...' : (editandoGasto ? 'Actualizar Gasto' : 'Agregar Gasto')}
                     </button>
                   </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showCompleteModal && (
+        <div className="gasto-modal-overlay" onClick={handleCloseCompleteModal}>
+          <div className="gasto-modal gasto-complete-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="gasto-modal-header">
+              <h2 className="gasto-modal-title">
+                {!selectedMember ? "Completar Gastos de Miembros" : `Completar Gastos de ${selectedMember.name}`}
+              </h2>
+              <button className="gasto-modal-close" onClick={handleCloseCompleteModal}>
+                ✕
+              </button>
+            </div>
+
+            <div className="gasto-modal-content">
+              {!selectedMember ? (
+                <div className="gasto-member-selection">
+                  <h3 className="gasto-step-title">Selecciona un miembro para completar sus gastos</h3>
+                  {spaceMembers.length === 0 ? (
+                    <div className="gasto-no-members">
+                      <div className="gasto-no-members-icon">👥</div>
+                      <h4 className="gasto-no-members-title">No hay otros miembros</h4>
+                      <p className="gasto-no-members-message">
+                        No hay otros miembros en este espacio para gestionar sus gastos
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="gasto-members-list">
+                      {spaceMembers.map((member) => (
+                        <button key={member.id} className="gasto-member-card" onClick={() => handleMiembroSelecc(member)}>
+                          <div className="gasto-member-card-left">
+                            <div className="gasto-member-avatar">{member.avatar}</div>
+                            <div className="gasto-member-info">
+                              <h4 className="gasto-member-name">{member.name}</h4>
+                            </div>
+                          </div>
+                          <div className="gasto-member-card-right">
+                            <div className="gasto-pending-count">
+                              {member.gastosPendientes.length > 0 ? (
+                                <>
+                                  <span className="gasto-count-number">{member.gastosPendientes.length}</span>
+                                  <span className="gasto-count-label">
+                                    {member.gastosPendientes.length === 1 ? "Gasto pendiente" : "Gastos pendientes"}
+                                  </span>
+                                </>
+                              ) : (
+                                <span className="gasto-no-pending">Sin gastos pendientes</span>
+                              )}
+                            </div>
+                            <div className="gasto-arrow">→</div>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="gasto-member-expenses">
+                  <div className="gasto-selected-member">
+                    <div className="gasto-selected-member-avatar">{selectedMember.avatar}</div>
+                    <div className="gasto-selected-member-info">
+                      <h4 className="gasto-selected-member-name">{selectedMember.name}</h4>
+                    </div>
+                    <button className="gasto-change-member" onClick={() => setSelectedMember(null)}>
+                      Cambiar Miembro
+                    </button>
+                  </div>
+
+                  {selectedMember.gastosPendientes && selectedMember.gastosPendientes.length > 0 ? (
+                    <div className="gasto-member-expenses-list">
+                      <h4 className="gasto-expenses-title">
+                        Gastos Pendientes ({selectedMember.gastosPendientes.length})
+                      </h4>
+                      <div className="gasto-total-pending">
+                        <span className="gasto-total-label">Total pendiente:</span>
+                        <span className="gasto-total-amount">
+                          ${selectedMember.gastosPendientes.reduce((total, gasto) => total + gasto.amount, 0).toLocaleString('es-MX', { minimumFractionDigits: 2 })}
+                        </span>
+                      </div>
+                      {selectedMember.gastosPendientes.map((gasto) => (
+                        <div key={gasto.id} className="gasto-member-expense-item">
+                          <div className="gasto-member-expense-left">
+                            <div className="gasto-member-expense-icon"
+                              style={{ backgroundColor: gasto.color + "20", color: gasto.color }}
+                            >
+                              {gasto.icon}
+                            </div>
+                            <div className="gasto-member-expense-info">
+                              <h5 className="gasto-member-expense-title">{gasto.description}</h5>
+                              <div className="gasto-member-expense-meta">
+                                <span className="gasto-member-expense-category">{gasto.category}</span>
+                                <span className="gasto-member-expense-date">Fecha: {gasto.dueDate}</span>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="gasto-member-expense-right">
+                            <div className="gasto-member-expense-amount">
+                              ${gasto.amount.toLocaleString('es-MX', { minimumFractionDigits: 2 })}
+                            </div>
+                            <button
+                              className="gasto-complete-expense-button"
+                              onClick={() => completarPagoMiembro(gasto.pagoId)}
+                              disabled={cargando}
+                            >
+                              {cargando ? 'Procesando...' : 'Marcar Completado'}
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+
+                    </div>
+                  ) : (
+                    <div className="gasto-no-expenses">
+                      <div className="gasto-no-expenses-icon">✅</div>
+                      <h4 className="gasto-no-expenses-title">Sin gastos pendientes</h4>
+                      <p className="gasto-no-expenses-message">
+                        {selectedMember.name} no tiene gastos pendientes por completar
+                      </p>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
