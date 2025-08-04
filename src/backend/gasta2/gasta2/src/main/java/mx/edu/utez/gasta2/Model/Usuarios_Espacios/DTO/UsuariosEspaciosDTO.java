@@ -5,6 +5,7 @@ import mx.edu.utez.gasta2.Model.Usuarios_Espacios.UsuariosEspaciosBean;
 public class UsuariosEspaciosDTO {
     private Long id;
     private Long idEspacio;
+    private Long idUsuario;
     private String nombreUsuario;
     private String nombreEspacio;
     private String rol;
@@ -12,11 +13,20 @@ public class UsuariosEspaciosDTO {
 
     public UsuariosEspaciosDTO(UsuariosEspaciosBean bean) {
         this.id = bean.getId();
+        this.idUsuario = bean.getUsuario() != null ? bean.getUsuario().getId() : null;
         this.nombreUsuario = bean.getUsuario().getNombreusuario();
         this.idEspacio = bean.getEspacio() != null ? bean.getEspacio().getId() : null;
         this.nombreEspacio = bean.getEspacio() != null ? bean.getEspacio().getNombre() : null;
         this.rol = bean.getRol().getRol();
         this.porcentajeGasto = bean.getPorcentajeGasto();
+    }
+
+    public Long getIdUsuario() {
+        return idUsuario;
+    }
+
+    public void setIdUsuario(Long idUsuario) {
+        this.idUsuario = idUsuario;
     }
 
     public Long getIdEspacio() {
