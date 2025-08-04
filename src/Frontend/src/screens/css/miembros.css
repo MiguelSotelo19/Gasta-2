@@ -134,8 +134,8 @@
 }
 
 .small-button {
-  width: 2rem;
-  height: 2rem;
+  width: 2.3rem;
+  height: 2.3rem;
   border: 0.0625rem solid #d1d5db;
   background: white;
   border-radius: 0.25rem;
@@ -155,6 +155,11 @@
 .small-button.danger:hover {
   border-color: #ef4444;
   color: #dc2626;
+}
+
+.small-button.edit:hover {
+  border-color: #efe144;
+  color: #c4dc26;
 }
 
 .empty-state {

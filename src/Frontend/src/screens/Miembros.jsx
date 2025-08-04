@@ -24,7 +24,6 @@ export const Miembros = ({ espacioActual, nombreEspacio, onSalirDelEspacio }) =>
 
     useEffect(() => {
         if (espacioActual) {
-            console.log("actual: ", espacioActual)
             setMostrarCodigo(false)
             async function gets() {
                 await getEspacio();
@@ -37,12 +36,10 @@ export const Miembros = ({ espacioActual, nombreEspacio, onSalirDelEspacio }) =>
     const getMiembrosEspacio = async () => {
         try {
             const respuesta = await axiosInstance(urlEspaciosUser);
-            console.log("getMiembrosEspacio: ", respuesta.data.data);
 
             const miembrosEspacio = respuesta.data.data.filter((espacio) => espacio.nombreEspacio === espacioActual.nombreEspacio);
             const miembroAdmin = respuesta.data.data.find((espacio) => espacio.rol === "Administrador" && espacio.nombreEspacio === espacioActual.nombreEspacio);
 
-            console.log("miembros del espacio: ", miembrosEspacio);
             setMiembrosDelEspacio(miembrosEspacio);
             setNombreAdmin(miembroAdmin);
 
@@ -52,22 +49,19 @@ export const Miembros = ({ espacioActual, nombreEspacio, onSalirDelEspacio }) =>
             }
 
         } catch (e) {
-            console.log(e);
+            toast.error("Ha ocurrido un error. Intente de nuevo mas tarde.");
         }
     }
 
     const getEspacio = async () => {
         try {
-            console.log("espacioactual: ", espacioActual)
             const respuesta = await axiosInstance(urlEspacio)
             const espacioSeleccionado = respuesta.data.data.find((u) => u.nombre === espacioActual.nombreEspacio);
             setCodigo(espacioSeleccionado.codigoinvitacion)
-            console.log("este es: ", respuesta.data.data.find((u) => u.nombre === espacioActual.nombreEspacio))
             setNombre(espacioActual.nombreUsuario)
             setIdEspacio(espacioSeleccionado.id)
         } catch (e) {
-            console.log(e)
-        }
+toast.error("Ha ocurrido un error. Intente de nuevo mas tarde.");        }
 
     }
 
@@ -77,14 +71,13 @@ export const Miembros = ({ espacioActual, nombreEspacio, onSalirDelEspacio }) =>
             const usuarioEncontrado = respuesta.data.data.find((u) => u.nombreusuario === usuario.nombreUsuario);
 
             if (!usuarioEncontrado) {
-                console.log("Usuario no encontrado:", usuario.nombreUsuario);
-                return null;
+toast.error("No se ha encontrado el usuario.");                
+return null;
             }
 
-            console.log("Usuario encontrado:", usuarioEncontrado);
             return usuarioEncontrado.id;
         } catch (e) {
-            console.log("error getId: ", e);
+toast.error("Ha ocurrido un error. Intente de nuevo mas tarde.");
             return null;
         }
     }
@@ -92,9 +85,6 @@ export const Miembros = ({ espacioActual, nombreEspacio, onSalirDelEspacio }) =>
 
     const actualizarRol = async (usuarioSeleccionado) => {
         try {
-            console.log("=== DEBUG ACTUALIZAR ROL ===");
-            console.log("Usuario seleccionado:", usuarioSeleccionado);
-
             if (!usuarioSeleccionado || !espacioActual) {
                 toast.error("Faltan datos necesarios para cambiar el rol");
                 return;
@@ -118,17 +108,14 @@ export const Miembros = ({ espacioActual, nombreEspacio, onSalirDelEspacio }) =>
                 idUser: idUsuarioReal
             };
 
-            console.log("Parámetros para cambio de rol:", parametros);
 
             const response = await axiosInstance.put(`${API_URL}/api/usuarios-espacios/change-role`, parametros);
 
-            console.log("Respuesta del cambio de rol:", response.data);
             toast.success(`${usuarioSeleccionado.nombreUsuario} ahora es administrador`);
 
             await getMiembrosEspacio();
 
         } catch (error) {
-            console.error("Error al cambiar rol:", error);
 
             if (error.response?.status === 403) {
                 toast.error("No tienes permisos para cambiar roles");
@@ -144,9 +131,6 @@ export const Miembros = ({ espacioActual, nombreEspacio, onSalirDelEspacio }) =>
 
     const eliminarUsuario = async (usuarioSeleccionado) => {
         try {
-            console.log("=== DEBUG ELIMINAR USUARIO ===");
-            console.log("Usuario seleccionado:", usuarioSeleccionado);
-
             if (!usuarioSeleccionado || !idEspacio) {
                 toast.error("Faltan datos necesarios para eliminar el usuario");
                 return;
@@ -159,14 +143,8 @@ export const Miembros = ({ espacioActual, nombreEspacio, onSalirDelEspacio }) =>
                 return;
             }
 
-            console.log("ID del usuario a eliminar:", idUsuarioReal);
-            console.log("ID del espacio:", idEspacio);
-
             const url = urlEliminarUsuario + `${idEspacio}/usuarios/${idUsuarioReal}`
             const response = await axiosInstance.delete(url);
-
-            console.log("Respuesta de eliminación:", response.data);
-
 
             if (idUsuarioReal === userId) {
                 setModalEliminarAbierto(false);

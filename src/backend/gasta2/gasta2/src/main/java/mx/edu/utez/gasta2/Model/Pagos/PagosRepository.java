@@ -23,5 +23,6 @@ public interface PagosRepository extends JpaRepository<PagoBean, Long> {
 """)
     List<PagoBean> findAllByUsuarioAndEspacio(@Param("idUsuario") Long idUsuario,
                                               @Param("idEspacio") Long idEspacio);
-
+    @Query("SELECT p FROM PagoBean p WHERE p.gasto.id = :gastoId")
+    List<PagoBean> findByGasto_Id(@Param("gastoId") Long gastoId);
 }

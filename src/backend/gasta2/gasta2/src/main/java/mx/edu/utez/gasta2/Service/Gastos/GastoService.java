@@ -21,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -108,7 +109,7 @@ public class GastoService {
         var gasto = optional.get();
 
         // Verificar que el gasto pertenezca al espacio indicado
-        Long espacioDelGasto = gasto.getTipogasto().getEspacio().getId();  // espacio real del gasto (a través de la categoría actual)
+        Long espacioDelGasto = gasto.getTipogasto().getEspacio().getId();
 
         // Validación adicional
         if (!espacioDelGasto.equals(dto.getIdEspacio())) {
@@ -142,7 +143,43 @@ public class GastoService {
 
         gastoRepository.save(gasto);
 
+        // NUEVO: Actualizar todos los pagos relacionados con este gasto
+        actualizarPagosDelGasto(gasto, Double.valueOf(dto.getCantidad()));
+
         return new ResponseEntity<>(new ApiResponse(HttpStatus.OK, false, "Gasto actualizado correctamente"), HttpStatus.OK);
+    }
+
+    private void actualizarPagosDelGasto(GastoBean gasto, Double nuevaCantidad) {
+        // Obtener todos los pagos relacionados con este gasto
+        List<PagoBean> pagosDelGasto = pagoRepository.findByGasto_Id(gasto.getId());
+
+        // Obtener los usuarios del espacio con su porcentaje de gasto
+        Long espacioId = gasto.getTipogasto().getEspacio().getId();
+        List<Object[]> usuariosConPorcentaje = userEspaciosRepository.findUsuariosConPorcentajeByEspacioId(espacioId);
+
+        // Crear un map para acceso rápido a los porcentajes por usuario
+        Map<Long, Double> porcentajesPorUsuario = usuariosConPorcentaje.stream()
+                .collect(Collectors.toMap(
+                        row -> ((UsuarioBean) row[0]).getId(),
+                        row -> (Double) row[1]
+                ));
+
+        // Actualizar cada pago
+        for (PagoBean pago : pagosDelGasto) {
+            Long usuarioId = pago.getUsuario().getId();
+            Double porcentaje = porcentajesPorUsuario.get(usuarioId);
+
+            if (porcentaje != null) {
+                // Calcular el nuevo monto basado en el porcentaje
+                double nuevoMonto = (nuevaCantidad * (porcentaje / 100.0));
+                pago.setMonto(nuevoMonto);
+
+                // Marcar el pago como no pagado (false) automáticamente
+                pago.setEstatus(false);
+
+                pagoRepository.save(pago);
+            }
+        }
     }
 
     public List<GastoResponseDTO> findAllByEspacioId(Long idEspacio) {

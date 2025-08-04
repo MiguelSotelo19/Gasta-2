@@ -41,8 +41,6 @@ export const Hub = () => {
 
 
     useEffect(() => {
-        console.log("userId:", userId);
-        console.log("token :", localStorage.getItem("accessToken"))
         getUser();
         getEspacios();
         getTodosEspacios()
@@ -78,14 +76,12 @@ export const Hub = () => {
     const getUser = async () => {
         try {
             const respuesta = await axiosInstance(urlUser)
-
             const usuarioEncontrado = respuesta.data.data.find((u) => u.id === parseInt(userId));
 
             setUsuario(usuarioEncontrado);
             setEspaciosDisponibles(usuarioEncontrado.espaciosdisponibles)
             setNombre(usuarioEncontrado.nombreusuario)
             setCorreo(usuarioEncontrado.correo)
-            console.log("usuario", usuarioEncontrado)
         } catch (e) {
             console.log("error getUser: ", e)
         }
@@ -98,7 +94,6 @@ export const Hub = () => {
             const espaciosData = respuesta.data.data.filter((espacio) => espacio.nombreEspacio);
 
             setEspacios(espaciosData);
-            console.log("espaciosdata: ", espaciosData)
             if (espaciosData.length === 0) {
                 setEspacioActual(null);
                 return;
@@ -106,7 +101,6 @@ export const Hub = () => {
             if (!espacioActual || !espaciosData.some(e => e.id === espacioActual.id)) {
                 setEspacioActual(espaciosData[0]);
             }
-            console.log("espacioActual: ", espacioActual)
         } catch (e) {
             console.log("errorGetEspacios: ", e)
         }
@@ -116,7 +110,6 @@ export const Hub = () => {
         try {
             const respuesta = await axiosInstance(urlEspaciosUserAll)
             setTodosEspacios(respuesta.data.data);
-            console.log("todos los espacios: ", respuesta.data.data)
         } catch (e) {
             console.log("errorGetEspacios: ", e)
         }
@@ -132,7 +125,6 @@ export const Hub = () => {
     };
 
     const agregarEspacio = async () => {
-        console.log("userId:", userId);
         const nombreNormalizado = nuevoEspacio.trim().toLowerCase();
         if (!nombreNormalizado) {
             toast.error("El nombre del espacio no puede estar vacío.");
@@ -154,16 +146,12 @@ export const Hub = () => {
             return;
         }
         try {
-            console.log("urlCrearEspacios: ", urlCrearEspacio)
             const parametros = {
                 nombre: nombreNormalizado,
                 idUsuario: parseInt(userId)
             }
-            console.log("parametros: ", parametros)
-            console.log("token dentro de la peticion: ", localStorage.getItem("accessToken"))
             const response = await axiosInstance.post(urlCrearEspacio, parametros);
 
-            console.log("response: ", response)
             if (response) {
                 toast.success("Espacio agregado correctamente.");
                 setNuevoEspacio("");
@@ -224,7 +212,6 @@ export const Hub = () => {
 
             const response = await axiosInstance.post(urlUnirseEspacio, parametros);
 
-            console.log("Unido exitosamente:", response.data);
             toast.success("Te has unido al espacio correctamente");
 
             await getEspacios();
