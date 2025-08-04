@@ -441,10 +441,89 @@ export const Reportes = ({ espacioActual, nombreEspacio }) =>{
               </CardContent>
             </Card>
           </div>
-
-
+{/* Tabla de historial existente */}
+          <div className="reportes-container-reporte">          
+            <div className="reportes-card-reporte reportes-full-width-reporte">
+              <div className="reportes-card-header-reporte">
+                <h3 className="reportes-card-title-reporte">
+                  <span>📋</span>
+                  Historial de Gastos Registrados
+                </h3>
+                <div className="reportes-table-info-reporte">
+                  Mostrando {expenseData.length} gastos 
+                </div>
+              </div>
+              <div className="reportes-card-content-reporte">
+                <div className="reportes-table-container-reporte">
+                  <table className="reportes-table-reporte">
+                    <thead>
+                      <tr>
+                        <th>Fecha</th>
+                        <th>Descripción</th>
+                        <th>Categoría</th>
+                        <th>Usuario</th>
+                        <th>Cantidad</th>
+                        <th>Pagado</th>
+                      </tr>
+                    </thead>
+                    
+                    <tbody>
+                      {expenseData.map((expense) => (
+                        <tr key={expense.id}>
+                          <td className="reportes-date-cell-reporte">{expense.date}</td>
+                          <td className="reportes-description-cell-reporte">{expense.description}</td>
+                          <td>
+                            <span
+                              className="reportes-category-badge-reporte"
+                              style={{ backgroundColor: tailwindToHexMap[expense.categoryColor] + "20", color: tailwindToHexMap[expense.categoryColor] }}
+                            >
+                              {expense.category}
+                            </span>
+                          </td>
+                          <td className="reportes-user-cell-reporte">{expense.user}</td>
+                          <td className="reportes-amount-cell-reporte">${expense.amount.toLocaleString()}</td>
+                          <td className="reportes-description-cell-reporte">{(expense.status) ? "Si" : "No"}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
             </div>
           </div>
-        </>
-    )
-}
+        </div>
+      </div>
+
+      {/* Modal de preview Excel */}
+      <ReportePreviewModal
+        isOpen={showPreviewModal}
+        onClose={handleClosePreview}
+        preview={preview}
+        onConfirmDownload={handleConfirmDownload}
+        loading={reporteLoading}
+      />
+
+      {/* Modal de preview PDF */}
+      <PDFPreviewModal
+        isOpen={showPDFPreviewModal}
+        onClose={handleClosePDFPreview}
+        pdfUrl={pdfPreview}
+        onConfirmDownload={handleConfirmPDFDownload}
+        loading={pdfLoading}
+      />
+
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="colored"
+      />
+    </>
+  );
+};
