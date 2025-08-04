@@ -336,7 +336,7 @@
 }
 
 .reportes-user-amount-reporte {
-  text-align: right;
+  text-align: center;
 }
 
 .reportes-amount-reporte {
@@ -401,7 +401,7 @@
 .reportes-amount-cell-reporte {
   font-weight: 600;
   color: #059669;
-  text-align: right;
+  text-align: left;
 }
 
 /* Responsive */
