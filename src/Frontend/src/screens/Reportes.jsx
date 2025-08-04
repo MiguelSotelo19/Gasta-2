@@ -221,6 +221,60 @@ export const Reportes = ({ espacioActual, nombreEspacio }) => {
     getData();
   }, [selectedPeriod]);
 
+  // Funciones para manejo de reportes Excel
+  const handlePreview = async () => {
+    const validacion = validarDatosReporte(expenseData, categoryData, lineData, nombreEspacio);
+    if (!validacion.esValido) {
+      toast.error("Por favor corrige los errores antes de generar el reporte");
+      return;
+    }
+
+    try {
+      setShowPreviewModal(true);
+      await generarPreview(
+        expenseData, categoryData, lineData, nombreEspacio, 
+        selectedPeriod, totalExpenses, averageExpense, cantPagos
+      );
+    } catch (error) {
+      setShowPreviewModal(false);
+    }
+  };
+
+  const handleExport = async () => {
+    const validacion = validarDatosReporte(expenseData, categoryData, lineData, nombreEspacio);
+    if (!validacion.esValido) {
+      toast.error("Por favor corrige los errores antes de generar el reporte");
+      return;
+    }
+
+    try {
+      await generarExcel(
+        expenseData, categoryData, lineData, nombreEspacio, 
+        selectedPeriod, totalExpenses, averageExpense, cantPagos
+      );
+    } catch (error) {
+      console.error('Error exportando:', error);
+    }
+  };
+
+  const handleConfirmDownload = async () => {
+    try {
+      await generarExcel(
+        expenseData, categoryData, lineData, nombreEspacio, 
+        selectedPeriod, totalExpenses, averageExpense, cantPagos
+      );
+      setShowPreviewModal(false);
+      setPreview(null);
+    } catch (error) {
+      console.error('Error descargando:', error);
+    }
+  };
+
+  const handleClosePreview = () => {
+    setShowPreviewModal(false);
+    setPreview(null);
+  };
+
     return (
     <>
       <div>
