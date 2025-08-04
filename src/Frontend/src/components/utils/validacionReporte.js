@@ -10,7 +10,7 @@ export const validarDatosReporte = (expenseData, categoryData, lineData, nombreE
   }
 
   if (!lineData || lineData.length === 0) {
-    errores.push('Debe haber al menos un usuario con aportes');
+    errores.push('Debe haber al menos un usuario que haya completado un gasto');
   }
 
   if (!expenseData || expenseData.length === 0) {
