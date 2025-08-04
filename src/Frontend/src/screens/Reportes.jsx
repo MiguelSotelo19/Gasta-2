@@ -275,7 +275,64 @@ export const Reportes = ({ espacioActual, nombreEspacio }) => {
     setPreview(null);
   };
 
-    return (
+  // Funciones para manejo de reportes PDF
+  const handlePDFPreview = async () => {
+    const validacion = validarDatosReporte(expenseData, categoryData, lineData, nombreEspacio);
+    if (!validacion.esValido) {
+      toast.error("Por favor corrige los errores antes de generar el reporte PDF");
+      return;
+    }
+
+    try {
+      setShowPDFPreviewModal(true);
+      const reportData = prepararDatosReporte(
+        expenseData, categoryData, lineData, nombreEspacio, 
+        selectedPeriod, totalExpenses, averageExpense, cantPagos
+      );
+      await generarPDFPreview(reportData);
+    } catch (error) {
+      setShowPDFPreviewModal(false);
+    }
+  };
+
+  const handlePDFExport = async () => {
+    const validacion = validarDatosReporte(expenseData, categoryData, lineData, nombreEspacio);
+    if (!validacion.esValido) {
+      toast.error("Por favor corrige los errores antes de generar el reporte PDF");
+      return;
+    }
+
+    try {
+      const reportData = prepararDatosReporte(
+        expenseData, categoryData, lineData, nombreEspacio, 
+        selectedPeriod, totalExpenses, averageExpense, cantPagos
+      );
+      await generarPDF(reportData);
+    } catch (error) {
+      console.error('Error exportando PDF:', error);
+    }
+  };
+
+  const handleConfirmPDFDownload = async () => {
+    try {
+      const reportData = prepararDatosReporte(
+        expenseData, categoryData, lineData, nombreEspacio, 
+        selectedPeriod, totalExpenses, averageExpense, cantPagos
+      );
+      await generarPDF(reportData);
+      setShowPDFPreviewModal(false);
+      limpiarPreview();
+    } catch (error) {
+      console.error('Error descargando PDF:', error);
+    }
+  };
+
+  const handleClosePDFPreview = () => {
+    setShowPDFPreviewModal(false);
+    limpiarPreview();
+  };
+
+  return (
     <>
       <div>
         <div className="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
