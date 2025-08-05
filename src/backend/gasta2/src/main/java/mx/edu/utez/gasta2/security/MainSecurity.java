@@ -71,30 +71,42 @@ public class MainSecurity {
         http.cors(Customizer.withDefaults()).csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(req ->
                         req.requestMatchers(WHITE_LIST).permitAll()
+                                // ESPACIOS
                                 .requestMatchers("/api/espacios/").hasAnyRole("Administrador", "Invitado")
                                 .requestMatchers("/api/espacios/crear").hasAnyRole("Administrador")
+
+                                // USUARIOS-ESPACIOS
                                 .requestMatchers("/api/usuarios-espacios/unirse").hasAnyRole("Administrador", "Invitado")
                                 .requestMatchers("/api/usuarios-espacios/change-role").hasAnyRole("Administrador")
                                 .requestMatchers(HttpMethod.DELETE, "/api/usuarios-espacios/*/usuarios/*").hasAnyRole("Administrador", "Invitado")
                                 .requestMatchers("/api/usuarios-espacios/porcentaje-faltante").hasAnyRole("Administrador", "Invitado")
                                 .requestMatchers(HttpMethod.POST, "/api/usuarios-espacios/*/reasignar-porcentaje").hasAnyRole("Administrador")
                                 .requestMatchers(HttpMethod.POST, "/api/usuarios-espacios/*/usuarios/*/asignar-porcentaje").hasAnyRole("Administrador")
-                                .requestMatchers("/api/categorias/**").hasAnyRole("Administrador", "Invitado")
-                                .requestMatchers("/api/categorias/").hasAnyRole("Administrador", "Invitado")
+                                .requestMatchers("/api/usuarios-espacios/asignar-porcentajes").hasAnyRole("Administrador")
+                                .requestMatchers("/api/usuarios-espacios/all/").hasAnyRole("Administrador")
+                                .requestMatchers("/api/usuarios-espacios/**").hasAnyRole("Administrador", "Invitado")
+
+                                // CATEGORÍAS - REGLAS ESPECÍFICAS PRIMERO
+                                .requestMatchers(HttpMethod.GET, "/api/categorias/*").hasAnyRole("Administrador", "Invitado")
+                                .requestMatchers("/api/categorias/").hasAnyRole("Administrador")
                                 .requestMatchers("/api/categorias/update/**").hasAnyRole("Administrador")
                                 .requestMatchers("/api/categorias/delete/**").hasAnyRole("Administrador")
+                                .requestMatchers("/api/categorias/**").hasRole("Administrador")
+
+                                // USUARIOS
                                 .requestMatchers("/api/usuarios/eliminar-cuenta/**").hasAnyRole("Administrador")
                                 .requestMatchers("/api/usuarios/all").hasAnyRole("Administrador", "Invitado")
-                                .requestMatchers("/api/usuarios-espacios/**").hasAnyRole("Administrador", "Invitado")
+
+                                // GASTOS
                                 .requestMatchers("/api/gastos/registrar").hasAnyRole("Administrador","Invitado")
                                 .requestMatchers("/api/gastos/editar/**").hasAnyRole("Administrador","Invitado")
-                                .requestMatchers("/api/usuarios-espacios/asignar-porcentajes").hasAnyRole("Administrador")
-                                .requestMatchers("api/gastos/espacio/**").hasAnyRole("Administrador", "Invitado")
-                                .requestMatchers("/api/pagos/{idUsuario}/{idEspacio}").hasAnyRole("Administrador", "Invitado")
-                                .requestMatchers("api/pagos/**").hasAnyRole("Administrador")
+                                .requestMatchers("/api/gastos/espacio/**").hasAnyRole("Administrador", "Invitado")
+
+                                // PAGOS - REGLAS ESPECÍFICAS PRIMERO
+                                .requestMatchers(HttpMethod.GET, "/api/pagos/*/*").hasAnyRole("Administrador", "Invitado")
                                 .requestMatchers("/api/pagos/all/**").hasAnyRole("Administrador")
                                 .requestMatchers("/api/pagos/satus/**").hasAnyRole("Administrador")
-                                .requestMatchers("/api/usuarios-espacios/all/").hasAnyRole("Administrador")
+                                .requestMatchers("/api/pagos/**").hasRole("Administrador")
 
                                 .anyRequest().authenticated()
                 )
