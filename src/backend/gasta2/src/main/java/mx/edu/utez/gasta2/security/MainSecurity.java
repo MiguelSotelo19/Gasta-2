@@ -71,7 +71,7 @@ public class MainSecurity {
         http.cors(Customizer.withDefaults()).csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(req ->
                         req.requestMatchers(WHITE_LIST).permitAll()
-                                .requestMatchers("/api/espacios/").hasAnyRole("Administrador")
+                                .requestMatchers("/api/espacios/").hasAnyRole("Administrador", "Invitado")
                                 .requestMatchers("/api/espacios/crear").hasAnyRole("Administrador")
                                 .requestMatchers("/api/usuarios-espacios/unirse").hasAnyRole("Administrador", "Invitado")
                                 .requestMatchers("/api/usuarios-espacios/change-role").hasAnyRole("Administrador")
@@ -89,7 +89,8 @@ public class MainSecurity {
                                 .requestMatchers("/api/gastos/registrar").hasAnyRole("Administrador","Invitado")
                                 .requestMatchers("/api/gastos/editar/**").hasAnyRole("Administrador","Invitado")
                                 .requestMatchers("/api/usuarios-espacios/asignar-porcentajes").hasAnyRole("Administrador")
-                                .requestMatchers("api/gastos/espacio/**").hasAnyRole("Administrador")
+                                .requestMatchers("api/gastos/espacio/**").hasAnyRole("Administrador", "Invitado")
+                                .requestMatchers("/api/pagos/{idUsuario}/{idEspacio}").hasAnyRole("Administrador", "Invitado")
                                 .requestMatchers("api/pagos/**").hasAnyRole("Administrador")
                                 .requestMatchers("/api/pagos/all/**").hasAnyRole("Administrador")
                                 .requestMatchers("/api/pagos/satus/**").hasAnyRole("Administrador")

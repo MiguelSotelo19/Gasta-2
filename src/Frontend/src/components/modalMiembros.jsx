@@ -10,6 +10,8 @@ export default function ModalMiembros({
   onUpdateSpace,
   onDeleteMember,
   onMakeAdmin,
+  getMiembrosEspacio,
+  getEspacio
 }) {
   const [modalAbierto, setModalAbierto] = useState(false);
   const [modalAdminAbierto, setModalAdminAbierto] = useState(false);
@@ -39,7 +41,7 @@ export default function ModalMiembros({
   };
 
   const guardarPorcentajes = async () => {
-    const total = Object.values(porcentajes).reduce((a, b) => a + b, 0);
+    const total = Object.values(porcentajes).reduce((a, b) => a + Number(b || 0), 0);
     if (total !== 100) {
       toast.error("Los porcentajes deben sumar exactamente 100%");
       return;
@@ -47,10 +49,8 @@ export default function ModalMiembros({
 
     console.log("Miembros del espacio:", miembrosDelEspacio);
 
-
-
     const asignaciones = miembrosDelEspacio.map((m) => ({
-      idUsuario: m.idUsuario, // Asegúrate que tengas este campo en los datos
+      idUsuario: m.idUsuario,
       porcentaje: porcentajes[m.nombreUsuario],
     }));
 
@@ -68,8 +68,10 @@ export default function ModalMiembros({
 
       console.log("Respuesta del servidor:", response);
 
-      if (response.status != 200) throw new Error("Error al guardar");
+      if (response.status !== 200) throw new Error("Error al guardar");
       toast.success("Porcentajes asignados correctamente");
+      await getMiembrosEspacio();
+      await getEspacio();
       cerrarModal();
     } catch (error) {
       console.error(error);
@@ -85,29 +87,25 @@ export default function ModalMiembros({
       });
       setPorcentajes(porcentajesIniciales);
     }
-  }, [modalAbierto, miembrosDelEspacio]) +
-    useEffect(() => {
-      let intervalo;
-      if (modalAdminAbierto && temporizador > 0) {
-        intervalo = setInterval(() => {
-          setTemporizador((prev) => {
-            if (prev === 1) {
-              setBotonHabilitado(true);
-            }
-            return prev - 1;
-          });
-        }, 1000);
-      }
-      return () => clearInterval(intervalo);
-    }, [modalAdminAbierto, temporizador]);
+  }, [modalAbierto, miembrosDelEspacio]);
 
-  const abrirModal = () => {
-    setModalAbierto(true);
-  };
+  useEffect(() => {
+    let intervalo;
+    if (modalAdminAbierto && temporizador > 0) {
+      intervalo = setInterval(() => {
+        setTemporizador((prev) => {
+          if (prev === 1) {
+            setBotonHabilitado(true);
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    }
+    return () => clearInterval(intervalo);
+  }, [modalAdminAbierto, temporizador]);
 
-  const cerrarModal = () => {
-    setModalAbierto(false);
-  };
+  const abrirModal = () => setModalAbierto(true);
+  const cerrarModal = () => setModalAbierto(false);
 
   const abrirModalAdmin = (usuario) => {
     setUsuarioSeleccionado(usuario);
@@ -135,9 +133,7 @@ export default function ModalMiembros({
     setModalPorcentajesAbierto(true);
     const nuevosPortentajes = {};
     miembrosDelEspacio
-      .filter(
-        (member) => member.nombreUsuario !== usuarioSeleccionado.nombreUsuario
-      )
+      .filter((member) => member.nombreUsuario !== usuarioSeleccionado.nombreUsuario)
       .forEach((member) => {
         nuevosPortentajes[member.nombreUsuario] = 0;
       });
@@ -147,7 +143,7 @@ export default function ModalMiembros({
   const handlePorcentajeChange = (nombreUsuario, valor) => {
     setPorcentajes((prev) => ({
       ...prev,
-      [nombreUsuario]: Number.parseInt(valor) || 0,
+      [nombreUsuario]: valor === "" ? 0 : parseInt(valor),
     }));
   };
 
@@ -164,7 +160,7 @@ export default function ModalMiembros({
 
   const confirmarPorcentajes = () => {
     const totalPorcentaje = Object.values(porcentajes).reduce(
-      (sum, val) => sum + val,
+      (sum, val) => sum + Number(val || 0),
       0
     );
     if (totalPorcentaje !== 100) {
@@ -173,7 +169,7 @@ export default function ModalMiembros({
     }
 
     Object.entries(porcentajes).forEach(([nombreUsuario, porcentaje]) => {
-      onUpdateSpace(nombreUsuario, porcentaje);
+      guardarPorcentajes();
     });
 
     setModalPorcentajesAbierto(false);
@@ -181,7 +177,7 @@ export default function ModalMiembros({
   };
 
   const totalPorcentaje = Object.values(porcentajes).reduce(
-    (sum, val) => sum + val,
+    (sum, val) => sum + Number(val || 0),
     0
   );
 
@@ -241,7 +237,7 @@ export default function ModalMiembros({
                           }
                           className="porcentaje-input"
                           disabled={
-                            espacioActual.rol !== "Administrador" || miembrosDelEspacio.length < 2
+                            espacioActual.rol !== "Administrador"
                           }
                         />
                         <span className="porcentaje-simbolo">%</span>
@@ -445,8 +441,7 @@ export default function ModalMiembros({
                           }
                           className="porcentaje-input-simple"
                           disabled={
-                            espacioActual.rol !== "Administrador" ||
-                            !espacioActual.status
+                            espacioActual.rol !== "Administrador"
                           }
                         />
                         <span className="porcentaje-simbolo">%</span>

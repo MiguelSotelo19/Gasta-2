@@ -174,6 +174,7 @@ toast.error("Ha ocurrido un error. Intente de nuevo mas tarde.");
     };
 
     const actualizarPorcentajes = async () => {
+        //No veo pa q usar esto
         /*Para el que le toque realizar esta funcion.
         
         Una vez el usuario se elimina de un espacio, ya sea que se salga solo, o que el admin lo saque,
@@ -264,6 +265,8 @@ toast.error("Ha ocurrido un error. Intente de nuevo mas tarde.");
                                     onDeleteMember={eliminarUsuario}
                                     onMakeAdmin={actualizarRol}
                                     onUpdateSpace={actualizarPorcentajes}
+                                    getMiembrosEspacio={getMiembrosEspacio}
+                                    getEspacio={getEspacio}
                                 />
                             )}
 
