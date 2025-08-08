@@ -165,15 +165,18 @@ export const Categorias = ({ espacioActual, nombreEspacio }) => {
             <h1>Categorías</h1>
             <p>Gestiona las categorías de gastos del espacio: {nombreEspacio}</p>
           </div>
-          <button
-            className="primary-button"
-            onClick={() => {
-              setCategoriaEditar(null);
-              setModalAbierto(true);
-            }}
-          >
-            <span>+</span> Nueva Categoría
-          </button>
+          {espacioActual?.rol === "Administrador" && (
+            <button
+              className="primary-button"
+              onClick={() => {
+                setCategoriaEditar(null);
+                setModalAbierto(true);
+              }}
+            >
+              <span>+</span> Nueva Categoría
+            </button>
+          )}
+
         </div>
 
 
