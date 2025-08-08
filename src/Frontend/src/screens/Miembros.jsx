@@ -61,7 +61,8 @@ export const Miembros = ({ espacioActual, nombreEspacio, onSalirDelEspacio }) =>
             setNombre(espacioActual.nombreUsuario)
             setIdEspacio(espacioSeleccionado.id)
         } catch (e) {
-toast.error("Ha ocurrido un error. Intente de nuevo mas tarde.");        }
+            toast.error("Ha ocurrido un error. Intente de nuevo mas tarde.");
+        }
 
     }
 
@@ -71,13 +72,13 @@ toast.error("Ha ocurrido un error. Intente de nuevo mas tarde.");        }
             const usuarioEncontrado = respuesta.data.data.find((u) => u.nombreusuario === usuario.nombreUsuario);
 
             if (!usuarioEncontrado) {
-toast.error("No se ha encontrado el usuario.");                
-return null;
+                toast.error("No se ha encontrado el usuario.");
+                return null;
             }
 
             return usuarioEncontrado.id;
         } catch (e) {
-toast.error("Ha ocurrido un error. Intente de nuevo mas tarde.");
+            toast.error("Ha ocurrido un error. Intente de nuevo mas tarde.");
             return null;
         }
     }

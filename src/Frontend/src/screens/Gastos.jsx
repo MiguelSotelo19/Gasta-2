@@ -139,6 +139,7 @@ export const Gastos = ({ espacioActual, nombreEspacio }) => {
       const response = await axiosInstance.get(urlGastos);
       if (response.data && Array.isArray(response.data.data)) {
         setGastos(response.data.data);
+        console.log(response.data.data)
       } else {
         toast.error("Error al cargar gastos");
         setGastos([]);
@@ -545,7 +546,7 @@ export const Gastos = ({ espacioActual, nombreEspacio }) => {
                       ${Number(pago?.monto || 0).toLocaleString('es-MX', { minimumFractionDigits: 2 })}
                     </div>
                     <div className="gasto-item-actions">
-                      {esAdmin && (
+                      {esAdmin ? (
                         !pago?.estatus ? (
                           <div className="acciones-horizontal">
                             <button
@@ -555,7 +556,8 @@ export const Gastos = ({ espacioActual, nombreEspacio }) => {
                             >
                               Marcar como Pagado
                             </button>
-                            <button className="small-button edit"
+                            <button
+                              className="small-button edit"
                               onClick={() => handleEditGasto(gasto)}
                             >
                               ✏️
@@ -564,14 +566,22 @@ export const Gastos = ({ espacioActual, nombreEspacio }) => {
                         ) : (
                           <div className="acciones-horizontal">
                             <span className="gasto-paid-status">✅ Pagado</span>
-                            <button className="small-button edit"
+                            <button
+                              className="small-button edit"
                               onClick={() => handleEditGasto(gasto)}
                             >
                               ✏️
                             </button>
                           </div>
                         )
+                      ) : (
+                        pago?.estatus ? (
+                          <div className="acciones-horizontal">
+                            <span className="gasto-paid-status">✅ Pagado</span>
+                          </div>
+                        ) : null
                       )}
+
                     </div>
                   </div>
                 </div>

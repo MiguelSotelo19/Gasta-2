@@ -10,6 +10,7 @@ public class UsuariosEspaciosDTO {
     private String nombreEspacio;
     private String rol;
     private Double porcentajeGasto;
+    private boolean status;
 
     public UsuariosEspaciosDTO(UsuariosEspaciosBean bean) {
         this.id = bean.getId();
@@ -19,6 +20,7 @@ public class UsuariosEspaciosDTO {
         this.nombreEspacio = bean.getEspacio() != null ? bean.getEspacio().getNombre() : null;
         this.rol = bean.getRol().getRol();
         this.porcentajeGasto = bean.getPorcentajeGasto();
+        this.status = bean.getEspacio() != null ? bean.getEspacio().getStatus(): false;
     }
 
     public Long getIdUsuario() {
@@ -75,5 +77,13 @@ public class UsuariosEspaciosDTO {
 
     public void setPorcentajeGasto(Double porcentajeGasto) {
         this.porcentajeGasto = porcentajeGasto;
+    }
+
+    public boolean isStatus() {
+        return status;
+    }
+
+    public void setStatus(boolean status) {
+        this.status = status;
     }
 }

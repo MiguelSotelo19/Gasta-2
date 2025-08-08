@@ -36,6 +36,9 @@ axiosInstance.interceptors.response.use(
       //window.location.href = "/"
       //localStorage.removeItem("userId")
     }
+    if (error.response?.status === 403) {
+      window.location.href = "/403"
+    }
     return Promise.reject(error)
   },
 )

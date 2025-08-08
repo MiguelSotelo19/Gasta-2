@@ -201,8 +201,10 @@ public class Usuarios_Espacio_Service {
 
         UsuariosEspaciosBean relacion = relacionOpt.get();
 
-        // Eliminar la relación
-        repository.delete(relacion);
+        // Actualizar el espacio a null para "desvincular" al usuario, tmb ajustar el porcentaje de gasto como null pq ya no tendria pq tenerlo
+        relacion.setEspacio(null);
+        relacion.setPorcentajeGasto(null);
+        repository.save(relacion);
 
         // Marcar espacio como inactivo
         espacio.setStatus(false);
