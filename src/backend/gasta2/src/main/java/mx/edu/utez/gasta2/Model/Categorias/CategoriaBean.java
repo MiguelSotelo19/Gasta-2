@@ -19,7 +19,7 @@ public class CategoriaBean {
     private String nombre;
 
     @JsonIgnore
-    @OneToMany(mappedBy = "tipogasto", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "tipogasto", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private Set<GastoBean> gastoBeans;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)

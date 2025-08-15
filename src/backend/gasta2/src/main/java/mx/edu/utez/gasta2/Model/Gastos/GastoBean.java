@@ -31,11 +31,11 @@ public class GastoBean {
 //    private UsuarioBean usuario;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "fk_id_categoria")
+    @JoinColumn(name = "fk_id_categoria" )
     private CategoriaBean tipogasto;
 
     @JsonIgnore
-    @OneToMany(mappedBy = "gasto", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "gasto", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private Set<PagoBean> pagoBeans;
     public GastoBean() {
     }
