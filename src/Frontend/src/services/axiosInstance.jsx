@@ -30,11 +30,11 @@ axiosInstance.interceptors.response.use(
   },
   (error) => {
     if (error.response?.status === 401) {
-      //localStorage.removeItem("accessToken")
-      //localStorage.removeItem("correo")
-      //sessionStorage.removeItem("usuario")
-      //window.location.href = "/"
-      //localStorage.removeItem("userId")
+      /*localStorage.removeItem("accessToken")
+      localStorage.removeItem("correo")
+      sessionStorage.removeItem("usuario")
+      window.location.href = "/"
+      localStorage.removeItem("userId")*/
     }
     if (error.response?.status === 403) {
       window.location.href = "/403"

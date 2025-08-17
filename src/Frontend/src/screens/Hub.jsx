@@ -18,6 +18,7 @@ import { Generico } from "./Generico"
 export const Hub = () => {
     const API_URL = import.meta.env.VITE_API_URL;
     const userId = localStorage.getItem("userId");
+    const userName = localStorage.getItem("userName");
     const urlUser = `${API_URL}/api/usuarios/all`;
     const urlEspaciosUser = `${API_URL}/api/usuarios-espacios/all?idUsuario=`;
     const urlCrearEspacio = `${API_URL}/api/espacios/crear`;
@@ -32,7 +33,7 @@ export const Hub = () => {
     const [espacioActual, setEspacioActual] = useState(null);
     const [nuevoEspacio, setNuevoEspacio] = useState("");
     const [modalNuevoEspacioAbierto, setModalNuevoEspacioAbierto] = useState(false);
-    const [modalConfiguracionAbierto, setModalConfiguracionAbierto] = useState(false);
+    const [dropdownAbierto, setDropdownAbierto] = useState(false);
     const [modoModal, setModoModal] = useState("opciones");
     const [usuario, setUsuario] = useState("");
     const [espaciosDisponibles, setEspaciosDisponibles] = useState(0);
@@ -64,6 +65,23 @@ export const Hub = () => {
             gets();
         }
     }, [espacioActual]);
+
+    // Cerrar dropdown al hacer clic fuera
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (!event.target.closest('.user-dropdown-container')) {
+                setDropdownAbierto(false);
+            }
+        };
+
+        if (dropdownAbierto) {
+            document.addEventListener('mousedown', handleClickOutside);
+        }
+
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, [dropdownAbierto]);
 
     const sidebar = [
         { id: "resumen", label: "Panel principal", icon: "🏠" },
@@ -421,7 +439,7 @@ export const Hub = () => {
                     <div className="user-info mt-1">
                         <h5>👤 {nombre}</h5>
                     </div>
-                    <button className="icon-button" onClick={() => setModalConfiguracionAbierto(true)}>
+                    <button className="icon-button" onClick={() => setDropdownAbierto(!dropdownAbierto)}>
                         ⚙️
                     </button>
                 </div>
@@ -433,10 +451,42 @@ export const Hub = () => {
                         <span className="search-icon"></span>
                     </div>
                     <div className="top-bar-actions">
-                        <button className="icon-button">🔔</button>
-                        <button className="icon-button" onClick={() => setModalConfiguracionAbierto(true)} >
-                            👤
-                        </button>
+                        {/*<button className="icon-button">🔔</button>*/}
+                        <div className="user-dropdown-container" style={{ position: 'relative' }}>
+                            <button className="icon-button pe-5" onClick={() => setDropdownAbierto(!dropdownAbierto)}>
+                                👤 {userName}
+                            </button>
+                            {dropdownAbierto && (
+                                <div className="user-dropdown" style={{
+                                    position: 'absolute',
+                                    top: '100%',
+                                    right: '0',
+                                    backgroundColor: 'white',
+                                    border: '1px solid #ccc',
+                                    borderRadius: '4px',
+                                    boxShadow: '0 2px 10px rgba(0,0,0,0.1)',
+                                    zIndex: 1000,
+                                    minWidth: '150px'
+                                }}>
+                                    <button 
+                                        onClick={cerrarSesion}
+                                        style={{
+                                            width: '100%',
+                                            padding: '10px 15px',
+                                            border: 'none',
+                                            backgroundColor: 'transparent',
+                                            textAlign: 'left',
+                                            cursor: 'pointer',
+                                            color: '#dc3545'
+                                        }}
+                                        onMouseOver={(e) => e.target.style.backgroundColor = '#f8f9fa'}
+                                        onMouseOut={(e) => e.target.style.backgroundColor = 'transparent'}
+                                    >
+                                        Cerrar sesión
+                                    </button>
+                                </div>
+                            )}
+                        </div>
                     </div>
                 </header>
 
@@ -455,48 +505,6 @@ export const Hub = () => {
                 codigoEspacio={codigoEspacio}
                 setCodigoEspacio={setCodigoEspacio}
             />
-
-            {modalConfiguracionAbierto && (
-                <>
-                    <div className="modal fade show d-block" tabIndex="-1" role="dialog" style={{ backgroundColor: "rgba(0,0,0,0.5)" }}>
-                        <div className="modal-dialog modal-dialog-centered" role="document">
-                            <div className="modal-content">
-                                <div className="modal-header d-flex justify-content-between">
-                                    <h5 className="modal-title">Configuración de cuenta</h5>
-                                    <button type="button" className="close" aria-label="Close" onClick={() => setModalConfiguracionAbierto(false)}
-                                        style={{ backgroundColor: "transparent", border: "none", fontSize: "1.25rem", color: "black", cursor: "pointer" }}>
-                                        <span aria-hidden="true">&times;</span>
-                                    </button>
-                                </div>
-                                <div className="modal-body">
-                                    <div className="mb-3">
-                                        <label className="form-label">Nombre</label>
-                                        <input type="text" className="form-control" value={''} readOnly />
-                                    </div>
-                                    <div className="mb-3">
-                                        <label className="form-label">Correo electrónico</label>
-                                        <input type="email" className="form-control" value={''} readOnly />
-                                    </div>
-                                    <div className="mb-3">
-                                        <label className="form-label">NIP</label>
-                                        <input type="text" className="form-control" value={''} readOnly />
-                                    </div>
-                                </div>
-                                <div className="modal-footer">
-                                    <button type="button" className="btn btn-secondary" onClick={() => setModalConfiguracionAbierto(false)}>
-                                        Cerrar
-                                    </button>
-                                    <button type="button" className="btn btn-danger" onClick={cerrarSesion}
-                                    >
-                                        Cerrar sesión
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div className="modal-backdrop fade show"></div>
-                </>
-            )}
         </div>
     )
 }

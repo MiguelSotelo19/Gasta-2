@@ -52,6 +52,7 @@ public class AuthService {
 
             Map<String, Object> responseData = new HashMap<>();
             responseData.put("token", token);
+            responseData.put("user", user.getNombreusuario());
             responseData.put("id", user.getId());
 
             return new ResponseEntity<>(new ApiResponse(responseData, HttpStatus.OK, "Token generado"), HttpStatus.OK);

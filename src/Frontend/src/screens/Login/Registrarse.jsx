@@ -8,6 +8,7 @@ import { Checkbox } from "../../components/ui/checkbox"
 import { Mail, Lock, User, DollarSign, CheckCircle } from "lucide-react"
 import axiosInstance from "../../services/axiosInstance"
 import { toast, ToastContainer } from "react-toastify"
+import { useNavigate } from "react-router-dom"
 
 export default function Registrarse() {
   const API_URL = import.meta.env.VITE_API_URL;
@@ -22,6 +23,7 @@ export default function Registrarse() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
   const [success, setSuccess] = useState(false)
+  const navigate = useNavigate();
 
   const handleInputChange = (field, value) => {
     setFormData((prev) => ({
@@ -98,8 +100,8 @@ export default function Registrarse() {
             <p className="text-gray-600 mb-6">
               Tu cuenta ha sido creada exitosamente.
             </p>
-            <Button asChild className="w-full bg-blue-500 hover:bg-blue-600">
-              <a href="/">Ir al Login</a>
+            <Button asChild className="w-full bg-blue-500 hover:bg-blue-600" onClick={() => navigate("/")}>
+              <p style={{ color: "white" }}>Ir al login</p>
             </Button>
           </CardContent>
         </Card>
@@ -197,7 +199,7 @@ export default function Registrarse() {
                       placeholder="tu_usuario"
                       value={formData.username}
                       onChange={(e) => handleInputChange("username", e.target.value)}
-                      className="pl-10 h-12 rounded-lg border-gray-200 bg-gray-50"
+                      className="pl-10 h-12 rounded-lg border-gray-200 bg-gray-50 ps-5"
                       required
                     />
                   </div>
@@ -213,7 +215,7 @@ export default function Registrarse() {
                       placeholder="tu@email.com"
                       value={formData.email}
                       onChange={(e) => handleInputChange("email", e.target.value)}
-                      className="pl-10 h-12 rounded-lg border-gray-200 bg-gray-50"
+                      className="pl-10 h-12 rounded-lg border-gray-200 bg-gray-50 ps-5"
                       required
                     />
                   </div>
@@ -229,7 +231,7 @@ export default function Registrarse() {
                       placeholder="Mínimo 6 caracteres"
                       value={formData.password}
                       onChange={(e) => handleInputChange("password", e.target.value)}
-                      className="pl-10 h-12 rounded-lg border-gray-200 bg-gray-50"
+                      className="pl-10 h-12 rounded-lg border-gray-200 bg-gray-50 ps-5"
                       required
                     />
                   </div>
@@ -245,7 +247,7 @@ export default function Registrarse() {
                       placeholder="Repite tu contraseña"
                       value={formData.confirmPassword}
                       onChange={(e) => handleInputChange("confirmPassword", e.target.value)}
-                      className="pl-10 h-12 rounded-lg border-gray-200 bg-gray-50"
+                      className="pl-10 h-12 rounded-lg border-gray-200 bg-gray-50 ps-5"
                       required
                     />
                   </div>
@@ -258,7 +260,7 @@ export default function Registrarse() {
                     onCheckedChange={(checked) => handleInputChange("acceptTerms", checked)}
                   />
                   <Label htmlFor="terms" className="text-sm text-gray-600">
-                    Acepto los{" "}
+                    &nbsp;&nbsp;Acepto los{" "}
                     <a href="/terms" className="text-blue-500 hover:underline">
                       Términos de Servicio
                     </a>{" "}
