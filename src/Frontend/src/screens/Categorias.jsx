@@ -1,12 +1,7 @@
 import "./css/general.css";
 import "./css/miembros.css";
 import { useEffect, useState } from "react";
-import {
-  getCategoriesByEspacio,
-  createCategoria,
-  updateCategoria,
-  deleteCategoria,
-} from "../services/categoryService";
+import { getCategoriesByEspacio, createCategoria, updateCategoria, deleteCategoria } from "../services/categoryService";
 import { toast } from "react-toastify";
 import Swal from "sweetalert2";
 import ModalNuevaCategoria from "../components/modalCategoria";
@@ -25,13 +20,9 @@ export const Categorias = ({ espacioActual, nombreEspacio }) => {
 
   const getColoresCateg = (categoryName) => {
     const colorPalette = [
-      '#10b981',
-      '#3b82f6',
-      '#8b5cf6',
-      '#f59e0b',
-      '#ef4444',
-      '#06b6d4',
-      '#6b7280'
+      '#10b981', '#3b82f6', '#8b5cf6',
+      '#f59e0b', '#ef4444', '#06b6d4', 
+      '#6b7280' 
     ];
 
     const firstLetter = categoryName?.charAt(0)?.toUpperCase();
