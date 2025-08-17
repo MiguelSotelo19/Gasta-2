@@ -142,7 +142,7 @@ export default function ForgotPassword() {
                         disabled={verify}
                         value={code}
                         onChange={(e) => setCode(e.target.value)}
-                        className="pl-10 h-12 rounded-lg border-gray-200 bg-gray-50"
+                        className="pl-10 h-12 rounded-lg border-gray-200 bg-gray-50 ps-5"
                         required
                     />
                     </div>
@@ -182,7 +182,7 @@ export default function ForgotPassword() {
                             placeholder="Contraseña"
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
-                            className="pl-10 h-12 rounded-lg border-gray-200 bg-gray-50"
+                            className="pl-10 h-12 rounded-lg border-gray-200 bg-gray-50 ps-5"
                             required
                         />
                         </div>
@@ -198,7 +198,7 @@ export default function ForgotPassword() {
                             placeholder="Contraseña"
                             value={confirmPassword}
                             onChange={(e) => setConfirmPassword(e.target.value)}
-                            className="pl-10 h-12 rounded-lg border-gray-200 bg-gray-50"
+                            className="pl-10 h-12 rounded-lg border-gray-200 bg-gray-50 ps-5"
                             required
                         />
                         </div>
@@ -324,7 +324,7 @@ export default function ForgotPassword() {
                       placeholder="tu@email.com"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      className="pl-10 h-12 rounded-lg border-gray-200 bg-gray-50"
+                      className="pl-10 h-12 rounded-lg border-gray-200 bg-gray-50 ps-5"
                       required
                     />
                   </div>
