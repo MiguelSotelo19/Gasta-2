@@ -39,4 +39,7 @@ public interface UserEspaciosRepository extends JpaRepository<UsuariosEspaciosBe
 
     @Query("SELECT ue.usuario FROM UsuariosEspaciosBean ue WHERE ue.espacio.id = :idEspacio")
     List<UsuarioBean> findUsuariosByEspacioId(@Param("idEspacio") Long idEspacio);
+
+    List<UsuariosEspaciosBean> findAllByUsuarioAndEspacioIsNull(UsuarioBean usuario);
+
 }

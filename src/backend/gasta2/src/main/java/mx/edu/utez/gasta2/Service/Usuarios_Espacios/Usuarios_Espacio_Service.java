@@ -193,7 +193,7 @@ public class Usuarios_Espacio_Service {
         UsuarioBean usuario = usuarioOpt.get();
         EspacioBean espacio = espacioOpt.get();
 
-        // Buscar relación
+        // Buscar relación actual
         Optional<UsuariosEspaciosBean> relacionOpt = repository.findByUsuarioAndEspacio(usuario, espacio);
         if (relacionOpt.isEmpty()) {
             return new ResponseEntity<>(new ApiResponse(HttpStatus.NOT_FOUND, true, "Relación no encontrada"), HttpStatus.NOT_FOUND);
@@ -201,7 +201,15 @@ public class Usuarios_Espacio_Service {
 
         UsuariosEspaciosBean relacion = relacionOpt.get();
 
-        // Actualizar el espacio a null para "desvincular" al usuario, tmb ajustar el porcentaje de gasto como null pq ya no tendria pq tenerlo
+        // ⚡ Eliminar posibles duplicados de relaciones con espacio = null
+        List<UsuariosEspaciosBean> duplicados = repository.findAllByUsuarioAndEspacioIsNull(usuario);
+        for (UsuariosEspaciosBean dup : duplicados) {
+            if (!dup.getId().equals(relacion.getId())) {
+                repository.delete(dup);
+            }
+        }
+
+        // Desvincular relación actual
         relacion.setEspacio(null);
         relacion.setPorcentajeGasto(null);
         repository.save(relacion);
