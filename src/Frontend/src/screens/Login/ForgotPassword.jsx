@@ -45,7 +45,7 @@ export default function ForgotPassword() {
                 setIsLoading(false)
             }
         } catch(e) {
-            console.log(e)
+            console.error(e)
             toast.warn("Algo salió mal, trabajaremos en ello lo antes posible")
             setIsLoading(false)
         }
@@ -71,7 +71,6 @@ export default function ForgotPassword() {
                 correo: email,
                 codigo: code
             })
-            console.log(respuesta)
 
             if (respuesta && respuesta.status == 200){
                 toast.success("Código verificado correctamente")
@@ -79,7 +78,7 @@ export default function ForgotPassword() {
                 setIsLoadingC(false)
             }
         } catch(e) {
-            console.log(e)
+            console.error(e)
             toast.warn("Algo salió mal, trabajaremos en ello lo antes posible")
             setVerify(false)
             setIsLoadingC(false)
@@ -102,14 +101,13 @@ export default function ForgotPassword() {
                 codigo: code,
                 password: password
             })
-            console.log(respuesta)
 
             if (respuesta && respuesta.status == 200){
                 toast.success("Contraseña restablecida correctamente")
                 setIsLoading(false)
             }
         } catch(e) {
-            console.log(e)
+            console.error(e)
             toast.warn("Algo salió mal, trabajaremos en ello lo antes posible")
             setIsLoadingP(false)
         }

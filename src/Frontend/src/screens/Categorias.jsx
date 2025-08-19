@@ -369,7 +369,7 @@ export const Categorias = ({ espacioActual, nombreEspacio }) => {
         categoriaEditar={categoriaEditar}
       />
 
-      <style jsx>{`
+      <style>{`
         .categoria-mejorada {
           display: flex;
           flex-direction: column;

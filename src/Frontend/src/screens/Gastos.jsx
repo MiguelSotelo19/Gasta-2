@@ -139,7 +139,6 @@ export const Gastos = ({ espacioActual, nombreEspacio }) => {
       const response = await axiosInstance.get(urlGastos);
       if (response.data && Array.isArray(response.data.data)) {
         setGastos(response.data.data);
-        console.log(response.data.data)
       } else {
         toast.error("Error al cargar gastos");
         setGastos([]);

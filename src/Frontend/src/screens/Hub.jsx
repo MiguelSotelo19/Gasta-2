@@ -111,7 +111,7 @@ export const Hub = () => {
                 setIdAdmin(idAdminReal);
             }
         } catch (e) {
-            console.log("Error getMiembrosEspacio:", e);
+            console.error("Error getMiembrosEspacio:", e);
             toast.error("Ha ocurrido un error. Intente de nuevo más tarde.");
         }
     };
@@ -129,7 +129,7 @@ export const Hub = () => {
                 setIdEspacio(espacioSeleccionado.id);
             }
         } catch (e) {
-            console.log("Error getEspacio:", e);
+            console.error("Error getEspacio:", e);
             toast.error("Ha ocurrido un error. Intente de nuevo más tarde.");
         }
     };
@@ -148,7 +148,7 @@ export const Hub = () => {
 
             return usuarioEncontrado.id;
         } catch (e) {
-            console.log("Error getId:", e);
+            console.error("Error getId:", e);
             toast.error("Ha ocurrido un error. Intente de nuevo más tarde.");
             return null;
         }
@@ -163,7 +163,7 @@ export const Hub = () => {
             
             window.location.reload();
         } catch (error) {
-            console.log("Error actualizarEstadoEspacio:", error);
+            console.error("Error actualizarEstadoEspacio:", error);
             toast.error("Error al actualizar el estado del espacio");
         }
     };
@@ -218,7 +218,7 @@ export const Hub = () => {
             setNombre(usuarioEncontrado.nombreusuario);
             setCorreo(usuarioEncontrado.correo);
         } catch (e) {
-            console.log("error getUser: ", e);
+            console.error("error getUser: ", e);
         }
     };
 
@@ -227,7 +227,6 @@ export const Hub = () => {
             const url = urlEspaciosUser + userId;
             const respuesta = await axiosInstance(url);
             const espaciosData = respuesta.data.data.filter((espacio) => espacio.nombreEspacio);
-            console.log("Espacios data:", respuesta.data.data);
             setEspacios(espaciosData);
             
             if (espaciosData.length === 0) {
@@ -239,7 +238,7 @@ export const Hub = () => {
                 setEspacioActual(espaciosData[0]);
             }
         } catch (e) {
-            console.log("errorGetEspacios: ", e);
+            console.error("errorGetEspacios: ", e);
         }
     };
 
@@ -248,7 +247,7 @@ export const Hub = () => {
             const respuesta = await axiosInstance(urlEspaciosUserAll);
             setTodosEspacios(respuesta.data.data);
         } catch (e) {
-            console.log("errorGetEspacios: ", e);
+            console.error("errorGetEspacios: ", e);
         }
     };
 
@@ -301,7 +300,7 @@ export const Hub = () => {
                 toast.error("Solo se permiten crear 5 espacios únicos.");
                 setNuevoEspacio("");
                 setModalNuevoEspacioAbierto(false);
-                console.log(e);
+                console.error(e);
             } else {
                 toast.error("Hubo un error al crear el espacio.");
                 setNuevoEspacio("");
@@ -370,7 +369,7 @@ export const Hub = () => {
             localStorage.removeItem("userId");
             navigate("/");
         } catch (error) {
-            console.log(error);
+            console.error(error);
         }
     };
 

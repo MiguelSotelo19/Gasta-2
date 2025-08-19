@@ -10,8 +10,7 @@ export const auth = async (correo, password) => {
         correo: correo,
         password: password,
       },
-    }) 
-    console.log("auth: ",response)
+    })
 
     if (response.data.data) {
       localStorage.setItem("accessToken", response.data.data.token);
