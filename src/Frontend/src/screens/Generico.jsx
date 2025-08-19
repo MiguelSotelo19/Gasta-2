@@ -57,8 +57,6 @@ export const Generico = ({
             return;
         }
 
-        console.log("Miembros del espacio:", miembrosDelEspacio);
-
         const asignaciones = miembrosDelEspacio.map((m) => ({
             idUsuario: m.idUsuario,
             porcentaje: porcentajes[m.nombreUsuario],
@@ -69,12 +67,8 @@ export const Generico = ({
             asignaciones,
         };
 
-        console.log("Payload para guardar porcentajes:", payload);
-
         try {
             const response = await axiosInstance.put(`${API_URL}/api/usuarios-espacios/asignar-porcentajes`, payload);
-
-            console.log("Respuesta del servidor:", response);
 
             if (response.status !== 200) throw new Error("Error al guardar");
             toast.success("Porcentajes asignados correctamente. Espacio reactivado.");

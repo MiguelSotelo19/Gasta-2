@@ -20,7 +20,6 @@ export default function ModalEliminarUsuario({
             location.reload()
         } else{
             setModalPorcentajesAbierto(false)
-            console.log("Hola2")
         }
     }
 
