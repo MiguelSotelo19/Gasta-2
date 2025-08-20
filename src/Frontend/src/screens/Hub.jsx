@@ -438,9 +438,6 @@ export const Hub = () => {
                     <div className="user-info mt-1">
                         <h5>👤 {nombre}</h5>
                     </div>
-                    <button className="icon-button" onClick={() => setDropdownAbierto(!dropdownAbierto)}>
-                        ⚙️
-                    </button>
                 </div>
             </div>
 

@@ -221,7 +221,17 @@ export const Miembros = ({ espacioActual, nombreEspacio, onSalirDelEspacio }) =>
 
                     {espacioActual != null && espacioActual.rol === "Administrador" ? (
                         <div className="members-actions">
-                            <button className="outline-button" onClick={() => setMostrarCodigo(true)}>
+                            <button
+                                className="outline-button"
+                                onClick={() => {
+                                    if (!mostrarCodigo) {
+                                        setMostrarCodigo(true);
+                                        navigator.clipboard.writeText(codigo)
+                                    } else {
+                                        navigator.clipboard.writeText(codigo)
+                                    }
+                                }}
+                            >
                                 {mostrarCodigo ? (
                                     <>
                                         Código: <span className="code-display">{codigo}</span>
@@ -230,6 +240,7 @@ export const Miembros = ({ espacioActual, nombreEspacio, onSalirDelEspacio }) =>
                                     "Mostrar código"
                                 )}
                             </button>
+
                             <button className="outline-button-salir" onClick={() => abrirModalEliminarUsuario(espacioActual)}>
                                 Salir del espacio
                             </button>

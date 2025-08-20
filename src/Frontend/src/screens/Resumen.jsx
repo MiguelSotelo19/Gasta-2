@@ -117,10 +117,12 @@ export default function Resumen({ espacioActual, nombreEspacio }) {
             <h1>Panel principal</h1>
             <p>Resumen de gastos del espacio: {nombreEspacio}</p>
           </div>
+          {/*
           <button className="primary-button">
             <span>+</span>
             Agregar Gasto
           </button>
+          */}
         </div>
 
         <div className="stats-grid">

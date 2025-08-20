@@ -21,6 +21,8 @@ export default function ModalEspacios({
     setIsLoading(true);
     try {
       await unirseAEspacio(codigoEspacio);
+      setCodigoEspacio("");
+      setModoModal("opciones");
     } catch (error) {
       console.error("Error desde el modal:", error);
     } finally {
@@ -63,11 +65,19 @@ export default function ModalEspacios({
     }
   }
 
+  const handleCerrarModal = () => {
+    setModalNuevoEspacioAbierto(false);
+    setModoModal("opciones");
+    setCodigoEspacio("");
+    setNuevoEspacio("");
+  };
+
+
   if (!modalNuevoEspacioAbierto) return null
 
   return (
     <>
-      <div className="modal-espacios-overlay" onClick={() => setModalNuevoEspacioAbierto(false)}>
+      <div className="modal-espacios-overlay" onClick={handleCerrarModal}>
         <div className="modal-espacios-container" onClick={(e) => e.stopPropagation()}>
           <div className="modal-espacios-header">
             <div className="modal-espacios-icon-container">
@@ -159,9 +169,11 @@ export default function ModalEspacios({
               className="modal-espacios-btn modal-espacios-btn-secondary"
               onClick={() => {
                 if (modoModal === "opciones") {
-                  setModalNuevoEspacioAbierto(false)
+                  handleCerrarModal();
                 } else {
-                  setModoModal("opciones")
+                  setModoModal("opciones");
+                  setCodigoEspacio("");
+                  setNuevoEspacio("");
                 }
               }}
               disabled={isLoading}
